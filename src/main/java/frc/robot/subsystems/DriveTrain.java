@@ -31,6 +31,7 @@ public class DriveTrain extends SubsystemBase {
 
   public DriveTrain() {
   
+    //TODO: figure out the correct device IDs or reconfigure the IDs
     steer1 = new CANSparkMax(0, MotorType.kBrushless);
     drive1 = new CANSparkMax(0, MotorType.kBrushless);
 
@@ -49,11 +50,13 @@ public class DriveTrain extends SubsystemBase {
     SparkMaxAbsoluteEncoder encoder3 = steer3.getAbsoluteEncoder(Type.kDutyCycle);
     SparkMaxAbsoluteEncoder encoder4 = steer4.getAbsoluteEncoder(Type.kDutyCycle);
 
+    //TODO: determine if any encoder values need to be inverted 
     encoder1.setInverted(false);
     encoder2.setInverted(false);
     encoder3.setInverted(false);
     encoder4.setInverted(false);
 
+    //TODO: determine the position conversion factor 
     encoder1.setPositionConversionFactor(1);
     encoder2.setPositionConversionFactor(1);
     encoder3.setPositionConversionFactor(1);
@@ -77,7 +80,8 @@ public class DriveTrain extends SubsystemBase {
     controller3.setPositionPIDWrappingEnabled(true);
     controller4.setPositionPIDWrappingEnabled(true);
 
-    //sets P gain for the PID loop 
+    //sets P gain for the PID loop
+    //TODO: tune the P gain  
     controller1.setP(1);
     controller2.setP(1);
     controller3.setP(1);
@@ -126,6 +130,8 @@ public class DriveTrain extends SubsystemBase {
     double angle4 = Math.atan2(fwd4, str4);
 
     //set all wheel speeds
+    //TODO: limit speed in case speed goes over 1
+    //TODO: if calculated speed is 0, do not spin the steering motor  
     drive1.set(speed1);
     drive2.set(speed2);
     drive3.set(speed3);
@@ -136,6 +142,8 @@ public class DriveTrain extends SubsystemBase {
     steer2.getPIDController().setReference(angle2, ControlType.kPosition);
     steer3.getPIDController().setReference(angle3, ControlType.kPosition);
     steer4.getPIDController().setReference(angle4, ControlType.kPosition);
+
+    //TODO: ask the motors to go to a different angle and invert the speed depending on the closest position 
   }
 
 }

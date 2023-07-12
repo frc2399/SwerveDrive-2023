@@ -5,7 +5,9 @@
 package frc.robot;
 
 import frc.robot.subsystems.DriveTrain;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -17,7 +19,9 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-  private final DriveTrain m_exampleSubsystem = new DriveTrain();
+  private final DriveTrain m_driveTrain = new DriveTrain();
+
+  private Joystick joystick = new Joystick(0);
 
 
 
@@ -27,23 +31,13 @@ public class RobotContainer {
     configureBindings();
   }
 
-  /**
-   * Use this method to define your trigger->command mappings. Triggers can be created via the
-   * {@link Trigger#Trigger(java.util.function.BooleanSupplier)} constructor with an arbitrary
-   * predicate, or via the named factories in {@link
-   * edu.wpi.first.wpilibj2.command.button.CommandGenericHID}'s subclasses for {@link
-   * CommandXboxController Xbox}/{@link edu.wpi.first.wpilibj2.command.button.CommandPS4Controller
-   * PS4} controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
-   * joysticks}.
-   */
+ 
   private void configureBindings() {
-    // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
-    // new Trigger(m_exampleSubsystem::exampleCondition)
-    //     .onTrue(new ExampleCommand(m_exampleSubsystem));
-
-    // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
-    // cancelling on release.
-   // m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
+   m_driveTrain.setDefaultCommand(new RunCommand(() -> m_driveTrain.setSpeed(joystick.getRawAxis(0), joystick.getRawAxis(1), joystick.getRawAxis(2)), m_driveTrain));
+   //TODO: figure out which axis numbers correspond with which inputs from the joystick (ie which number represents forward, strafe, and rotation)
+   //TODO: tune joysticks (add deadband, square value maybe, etc)
+   //TODO: add a homing button that sets all wheels to position 0
+   //TODO: add a button that turns the robot into an X position
   }
 
   /**
@@ -55,4 +49,5 @@ public class RobotContainer {
     // An example command will be run in autonomous
     return null;
   }
+
 }
