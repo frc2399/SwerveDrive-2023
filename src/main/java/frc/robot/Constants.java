@@ -24,4 +24,10 @@ public final class Constants {
     //angle formed by the half length and radius of the robot, in radians 
     public static final double THETA = Math.acos(HALF_LENGTH / RADIUS); 
   }
+
+  public static class JoystickConstants {
+    public static final int FWD_AXIS = 1;
+    public static final int STR_AXIS = 0;
+    public static final int RCW_AXIS = 2;
+  }
 }

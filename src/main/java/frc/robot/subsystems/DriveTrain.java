@@ -10,22 +10,23 @@ import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.SparkMaxAbsoluteEncoder.Type;
 
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DriveTrainConstants;
 
 public class DriveTrain extends SubsystemBase {
   /** Creates a new ExampleSubsystem. */
-  public final CANSparkMax steer1; 
-  public final CANSparkMax drive1; 
+  public static CANSparkMax steer1; 
+  public static CANSparkMax drive1; 
 
-  public final CANSparkMax steer2; 
-  public final CANSparkMax drive2; 
+  public static CANSparkMax steer2; 
+  public static CANSparkMax drive2; 
 
-  public final CANSparkMax steer3; 
-  public final CANSparkMax drive3; 
+  public static CANSparkMax steer3; 
+  public static CANSparkMax drive3; 
 
-  public final CANSparkMax steer4; 
-  public final CANSparkMax drive4; 
+  public static CANSparkMax steer4; 
+  public static CANSparkMax drive4; 
 
 
 
@@ -131,19 +132,68 @@ public class DriveTrain extends SubsystemBase {
 
     //set all wheel speeds
     //TODO: limit speed in case speed goes over 1
-    //TODO: if calculated speed is 0, do not spin the steering motor  
-    drive1.set(speed1);
-    drive2.set(speed2);
-    drive3.set(speed3);
-    drive4.set(speed4);
+    if (speed1 != 0){
+      drive1.set(speed1);
+      steer1.getPIDController().setReference(angle1, ControlType.kPosition);
 
-    //steering motors controllers recieve the given target angle depending on the corner 
+    }
+    else{
+      drive1.set(0);
+      steer1.set(0); 
+    }
+
+    if (speed2 != 0){
+      drive2.set(speed1);
+      steer2.getPIDController().setReference(angle2, ControlType.kPosition);
+
+    }
+    else{
+      drive2.set(0);
+      steer2.set(0); 
+    }
+
+    if (speed3 != 0){
+      drive3.set(speed3);
+      steer3.getPIDController().setReference(angle3, ControlType.kPosition);
+
+    }
+    else{
+      drive3.set(0);
+      steer3.set(0); 
+    }
+
+    if (speed4 != 0){
+      drive4.set(speed4);
+      steer4.getPIDController().setReference(angle4, ControlType.kPosition);
+
+    }
+    else{
+      drive4.set(0);
+      steer4.set(0); 
+    }
+    //TODO: ask the motors to go to a different angle and invert the speed depending on the closest position 
+  }
+
+  public static void setWheelAngles(double angle1, double angle2, double angle3, double angle4){
     steer1.getPIDController().setReference(angle1, ControlType.kPosition);
     steer2.getPIDController().setReference(angle2, ControlType.kPosition);
     steer3.getPIDController().setReference(angle3, ControlType.kPosition);
     steer4.getPIDController().setReference(angle4, ControlType.kPosition);
-
-    //TODO: ask the motors to go to a different angle and invert the speed depending on the closest position 
   }
 
+  public static double[] flipAngle(double currentAngle, double targetAngle, double speed){
+    double[] changedValues = new double[2]; 
+    double desiredAngle = targetAngle;
+    double desiredSpeed = speed;
+    if(Math.abs(targetAngle - currentAngle) > Units.degreesToRadians(90) && Math.abs(targetAngle - currentAngle) < Units.degreesToRadians(270)){
+      desiredAngle += Units.degreesToRadians(180);
+      if (desiredAngle > Units.degreesToRadians(180)){
+        desiredAngle -= Units.degreesToRadians(360);
+      }
+      desiredSpeed *= -1;
+    }
+    changedValues[0] = desiredAngle;
+    changedValues[1] = desiredSpeed;
+    return changedValues;
+  }
 }

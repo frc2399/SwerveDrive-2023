@@ -4,11 +4,15 @@
 
 package frc.robot;
 
+import frc.robot.Constants.JoystickConstants;
 import frc.robot.subsystems.DriveTrain;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /**
@@ -33,11 +37,22 @@ public class RobotContainer {
 
  
   private void configureBindings() {
-   m_driveTrain.setDefaultCommand(new RunCommand(() -> m_driveTrain.setSpeed(joystick.getRawAxis(0), joystick.getRawAxis(1), joystick.getRawAxis(2)), m_driveTrain));
-   //TODO: figure out which axis numbers correspond with which inputs from the joystick (ie which number represents forward, strafe, and rotation)
+   m_driveTrain.setDefaultCommand(new RunCommand(() -> m_driveTrain.setSpeed(
+      joystick.getRawAxis(JoystickConstants.FWD_AXIS), 
+      joystick.getRawAxis(JoystickConstants.STR_AXIS), 
+      joystick.getRawAxis(JoystickConstants.RCW_AXIS)), m_driveTrain));
+    
+    //button that sets all wheels to 0 degrees (homing position)
+    new JoystickButton(joystick, 1).onTrue(
+        new InstantCommand(() -> DriveTrain.setWheelAngles(0,0,0,0))); 
+
+    //button that sets the wheels into lock position (an X)
+    new JoystickButton(joystick, 2).onTrue( new InstantCommand(() -> DriveTrain.setWheelAngles(
+          Units.degreesToRadians(45),
+          Units.degreesToRadians(-45),
+          Units.degreesToRadians(45),
+          Units.degreesToRadians(-45)))); 
    //TODO: tune joysticks (add deadband, square value maybe, etc)
-   //TODO: add a homing button that sets all wheels to position 0
-   //TODO: add a button that turns the robot into an X position
   }
 
   /**
