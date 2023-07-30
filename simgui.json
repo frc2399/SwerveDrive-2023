@@ -1,0 +1,29 @@
+{
+  "NTProvider": {
+    "types": {
+      "/FMSInfo": "FMSInfo",
+      "/SmartDashboard/Field": "Field2d",
+      "/SmartDashboard/Mech2d": "Mechanism2d"
+    },
+    "windows": {
+      "/SmartDashboard/Mech2d": {
+        "window": {
+          "visible": true
+        }
+      }
+    }
+  },
+  "NetworkTables": {
+    "transitory": {
+      "Shuffleboard": {
+        "open": true
+      },
+      "SmartDashboard": {
+        "Mech2d": {
+          "open": true
+        },
+        "open": true
+      }
+    }
+  }
+}

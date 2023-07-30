@@ -4,6 +4,9 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
  * constants. This class should not be used for any other purpose. All constants should be declared
@@ -23,6 +26,16 @@ public final class Constants {
 
     //angle formed by the half length and radius of the robot, in radians 
     public static final double THETA = Math.acos(HALF_LENGTH / RADIUS); 
+
+
+    public static final SwerveDriveKinematics kDriveKinematics = new SwerveDriveKinematics(
+      new Translation2d(HALF_LENGTH, HALF_WIDTH),
+      new Translation2d(HALF_LENGTH, -HALF_WIDTH),
+      new Translation2d(-HALF_LENGTH, HALF_WIDTH),
+      new Translation2d(-HALF_LENGTH, -HALF_WIDTH));
+
+
+
   }
 
   public static class JoystickConstants {
