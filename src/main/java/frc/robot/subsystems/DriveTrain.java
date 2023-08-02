@@ -48,6 +48,18 @@ public class DriveTrain extends SubsystemBase {
     steer4 = new CANSparkMax(0, MotorType.kBrushless);
     drive4 = new CANSparkMax(0, MotorType.kBrushless);
 
+    //driving motor inversion
+    drive1.setInverted(false);
+    drive2.setInverted(false);
+    drive3.setInverted(false);
+    drive4.setInverted(false);
+
+    //steering motor inversion 
+    steer1.setInverted(true);
+    steer2.setInverted(true);
+    steer3.setInverted(true);
+    steer4.setInverted(true);
+
     // steering encoders
     encoder1 = steer1.getAbsoluteEncoder(Type.kDutyCycle);
     encoder2 = steer2.getAbsoluteEncoder(Type.kDutyCycle);
