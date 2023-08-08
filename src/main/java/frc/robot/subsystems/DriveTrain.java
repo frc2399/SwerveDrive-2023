@@ -66,17 +66,21 @@ public class DriveTrain extends SubsystemBase {
     encoder3 = steer3.getAbsoluteEncoder(Type.kDutyCycle);
     encoder4 = steer4.getAbsoluteEncoder(Type.kDutyCycle);
 
-    // TODO: determine if any encoder values need to be inverted
     encoder1.setInverted(false);
     encoder2.setInverted(false);
     encoder3.setInverted(false);
     encoder4.setInverted(false);
 
-    // TODO: determine the position conversion factor
-    encoder1.setPositionConversionFactor(1);
-    encoder2.setPositionConversionFactor(1);
-    encoder3.setPositionConversionFactor(1);
-    encoder4.setPositionConversionFactor(1);
+    
+    encoder1.setPositionConversionFactor(2 * Math.PI);
+    encoder2.setPositionConversionFactor(2 * Math.PI);
+    encoder3.setPositionConversionFactor(2 * Math.PI);
+    encoder4.setPositionConversionFactor(2 * Math.PI);
+
+    encoder1.setZeroOffset(convertToSparkMaxAngle(0 + DriveTrainConstants.ENCODER1_OFFSET));
+    encoder2.setZeroOffset(convertToSparkMaxAngle(Math.PI/2 + DriveTrainConstants.ENCODER2_OFFSET));
+    encoder3.setZeroOffset(convertToSparkMaxAngle(Math.PI + DriveTrainConstants.ENCODER3_OFFSET));
+    encoder4.setZeroOffset(convertToSparkMaxAngle(-Math.PI/2 + DriveTrainConstants.ENCODER4_OFFSET));
 
     // steering pid controllers
     var controller1 = steer1.getPIDController();
@@ -106,10 +110,10 @@ public class DriveTrain extends SubsystemBase {
 
     // gives the controller a target value that is a position. since this is in the
     // constructor, we set the target to 0 so that the robot does not move
-    controller1.setReference(0, ControlType.kPosition);
-    controller2.setReference(0, ControlType.kPosition);
-    controller3.setReference(0, ControlType.kPosition);
-    controller4.setReference(0, ControlType.kPosition);
+    controller1.setReference(convertToSparkMaxAngle(0), ControlType.kPosition);
+    controller2.setReference(convertToSparkMaxAngle(0), ControlType.kPosition);
+    controller3.setReference(convertToSparkMaxAngle(0), ControlType.kPosition);
+    controller4.setReference(convertToSparkMaxAngle(0), ControlType.kPosition);
 
   }
 
@@ -169,7 +173,7 @@ public class DriveTrain extends SubsystemBase {
     // TODO: limit speed in case speed goes over 1
     if (flippedSpeed1 != 0) {
       drive1.set(flippedSpeed1);
-      steer1.getPIDController().setReference(flippedAngle1, ControlType.kPosition);
+      steer1.getPIDController().setReference(convertToSparkMaxAngle(flippedAngle1), ControlType.kPosition);
 
     } else {
       drive1.set(0);
@@ -178,7 +182,7 @@ public class DriveTrain extends SubsystemBase {
 
     if (flippedSpeed2 != 0) {
       drive2.set(flippedSpeed1);
-      steer2.getPIDController().setReference(flippedAngle2, ControlType.kPosition);
+      steer2.getPIDController().setReference(convertToSparkMaxAngle(flippedAngle2), ControlType.kPosition);
 
     } else {
       drive2.set(0);
@@ -187,7 +191,7 @@ public class DriveTrain extends SubsystemBase {
 
     if (flippedSpeed3 != 0) {
       drive3.set(flippedSpeed3);
-      steer3.getPIDController().setReference(flippedAngle3, ControlType.kPosition);
+      steer3.getPIDController().setReference(convertToSparkMaxAngle(flippedAngle3), ControlType.kPosition);
 
     } else {
       drive3.set(0);
@@ -196,7 +200,7 @@ public class DriveTrain extends SubsystemBase {
 
     if (flippedSpeed4 != 0) {
       drive4.set(flippedSpeed4);
-      steer4.getPIDController().setReference(flippedAngle4, ControlType.kPosition);
+      steer4.getPIDController().setReference(convertToSparkMaxAngle(flippedAngle4), ControlType.kPosition);
 
     } else {
       drive4.set(0);
@@ -206,11 +210,13 @@ public class DriveTrain extends SubsystemBase {
   }
 
   public static void setWheelAngles(double angle1, double angle2, double angle3, double angle4) {
-    steer1.getPIDController().setReference(angle1, ControlType.kPosition);
-    steer2.getPIDController().setReference(angle2, ControlType.kPosition);
-    steer3.getPIDController().setReference(angle3, ControlType.kPosition);
-    steer4.getPIDController().setReference(angle4, ControlType.kPosition);
+    steer1.getPIDController().setReference(convertToSparkMaxAngle(angle1), ControlType.kPosition);
+    steer2.getPIDController().setReference(convertToSparkMaxAngle(angle2), ControlType.kPosition);
+    steer3.getPIDController().setReference(convertToSparkMaxAngle(angle3), ControlType.kPosition);
+    steer4.getPIDController().setReference(convertToSparkMaxAngle(angle4), ControlType.kPosition);
   }
+
+
 
   public static double[] flipAngle(double currentAngle, double targetAngle, double speed) {
     double[] changedValues = new double[2];
@@ -227,5 +233,38 @@ public class DriveTrain extends SubsystemBase {
     changedValues[0] = desiredAngle;
     changedValues[1] = desiredSpeed;
     return changedValues;
+  }
+// convert zero to 2pi range to negative pi to pi range
+  public static double convertFromSparkMaxAngle(double currentAngle){
+    if (currentAngle >= 0 && currentAngle <= Math.PI)
+    {
+      return currentAngle; 
+    }
+     currentAngle= currentAngle - 2 * Math.PI;
+    while(currentAngle<-Math.PI){
+      currentAngle+=Math.PI*2;
+    }
+    while(currentAngle>Math.PI){
+      currentAngle-=Math.PI*2;
+  }
+  return currentAngle;
+  }
+
+//convert from negative pi to pi range to zero to 2pi range
+  public static double convertToSparkMaxAngle(double angle) {
+    if (angle >= 0 && angle <= Math.PI)
+    {
+      return angle; 
+    }
+    angle= angle+Math.PI * 2;
+    while(angle<0){
+      angle+=Math.PI*2;
+    }
+    while(angle>Math.PI *2){
+      angle-=Math.PI*2;
+    }
+    return angle;
+    
+  
   }
 }

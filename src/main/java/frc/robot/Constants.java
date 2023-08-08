@@ -23,6 +23,14 @@ public final class Constants {
 
     //angle formed by the half length and radius of the robot, in radians 
     public static final double THETA = Math.acos(HALF_LENGTH / RADIUS); 
+
+    //TODO: measure the encoder offsets
+    public static final double ENCODER1_OFFSET = 0;
+    public static final double ENCODER2_OFFSET = 0;
+    public static final double ENCODER3_OFFSET = 0;
+    public static final double ENCODER4_OFFSET = 0;
+  
+
   }
 
   public static class JoystickConstants {
