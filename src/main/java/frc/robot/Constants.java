@@ -35,6 +35,12 @@ public final class Constants {
       new Translation2d(-HALF_LENGTH, -HALF_WIDTH));
 
 
+    //TODO: measure the encoder offsets
+    public static final double ENCODER1_OFFSET = 0;
+    public static final double ENCODER2_OFFSET = 0;
+    public static final double ENCODER3_OFFSET = 0;
+    public static final double ENCODER4_OFFSET = 0;
+  
 
   }
 
