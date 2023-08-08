@@ -10,9 +10,23 @@ import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.SparkMaxAbsoluteEncoder.Type;
 
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
+import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
+import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.util.Color;
+import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DriveTrainConstants;
+
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
+
+
+import frc.robot.util.NavX.AHRS;
 
 public class DriveTrain extends SubsystemBase {
   /** Creates a new ExampleSubsystem. */
@@ -33,20 +47,44 @@ public class DriveTrain extends SubsystemBase {
   public static SparkMaxAbsoluteEncoder encoder3;
   public static SparkMaxAbsoluteEncoder encoder4;
 
+  private Field2d m_field = new Field2d();
+
+  private MechanismLigament2d upper_right_angle_lig;
+  private MechanismLigament2d upper_left_angle_lig;
+  private MechanismLigament2d lower_left_angle_lig;
+  private MechanismLigament2d lower_right_angle_lig;
+
+  private MechanismLigament2d upper_right_speed_lig;
+  private MechanismLigament2d upper_left_speed_lig;
+  private MechanismLigament2d lower_left_speed_lig;
+  private MechanismLigament2d lower_right_speed_lig;
+
+
+  // Odometry class for tracking robot pose
+  // SwerveDriveOdometry m_odometry = new SwerveDriveOdometry(
+  //   DriveTrainConstants.kDriveKinematics,
+  //     Rotation2d.fromDegrees(m_gyro.getAngle()),
+  //     new SwerveModulePosition[] {
+  //         drive1.getPosition(),
+  //         drive2.getPosition(),
+  //         drive3.getPosition(),
+  //         drive4.getPosition()
+  //     });
+
   public DriveTrain() {
 
     // TODO: figure out the correct device IDs or reconfigure the IDs
     steer1 = new CANSparkMax(0, MotorType.kBrushless);
-    drive1 = new CANSparkMax(0, MotorType.kBrushless);
+    drive1 = new CANSparkMax(1, MotorType.kBrushless);
 
-    steer2 = new CANSparkMax(0, MotorType.kBrushless);
-    drive2 = new CANSparkMax(0, MotorType.kBrushless);
+    steer2 = new CANSparkMax(2, MotorType.kBrushless);
+    drive2 = new CANSparkMax(3, MotorType.kBrushless);
 
-    steer3 = new CANSparkMax(0, MotorType.kBrushless);
-    drive3 = new CANSparkMax(0, MotorType.kBrushless);
+    steer3 = new CANSparkMax(4, MotorType.kBrushless);
+    drive3 = new CANSparkMax(5, MotorType.kBrushless);
 
-    steer4 = new CANSparkMax(0, MotorType.kBrushless);
-    drive4 = new CANSparkMax(0, MotorType.kBrushless);
+    steer4 = new CANSparkMax(6, MotorType.kBrushless);
+    drive4 = new CANSparkMax(7, MotorType.kBrushless);
 
     //driving motor inversion
     drive1.setInverted(false);
@@ -115,9 +153,77 @@ public class DriveTrain extends SubsystemBase {
     controller3.setReference(convertToSparkMaxAngle(0), ControlType.kPosition);
     controller4.setReference(convertToSparkMaxAngle(0), ControlType.kPosition);
 
+    // the main mechanism object
+    Mechanism2d mech_swerve = new Mechanism2d(10, 10);
+    // the mechanism root node
+    MechanismRoot2d root_front_right = mech_swerve.getRoot("drive1_front_right", 7.5, 7.5);
+    MechanismRoot2d root_front_left = mech_swerve.getRoot("drive2_front_left", 2.5, 7.5);
+    MechanismRoot2d root_lower_left = mech_swerve.getRoot("drive3_lower_left", 2.5, 2.5);
+    MechanismRoot2d root_lower_right = mech_swerve.getRoot("drive4_lower_right", 7.5, 2.5);
+
+    // create something to show the center
+    MechanismRoot2d root_front_right_center = mech_swerve.getRoot("root_front_right_center", 7.45, 7.5);
+    root_front_right_center.append(new MechanismLigament2d("drive1_front_right_center", 0.1, 0.0, 5.0, 
+                            new Color8Bit(Color.kGreenYellow)));
+
+    MechanismRoot2d root_front_left_center = mech_swerve.getRoot("root_front_left_center", 2.45, 7.5);
+    root_front_left_center.append(new MechanismLigament2d("root_front_left_center", 0.1, 0.0, 5.0, 
+                            new Color8Bit(Color.kGreenYellow)));
+
+    MechanismRoot2d root_lower_left_center = mech_swerve.getRoot("root_lower_left_center", 2.45, 2.5);
+    root_lower_left_center.append(new MechanismLigament2d("root_lower_left_center", 0.1, 0.0, 5.0, 
+                            new Color8Bit(Color.kGreenYellow)));
+
+    MechanismRoot2d root_lower_right_center = mech_swerve.getRoot("root_lower_right_center", 7.45, 2.5);
+    root_lower_right_center.append(new MechanismLigament2d("root_lower_right_center", 0.1, 0.0, 5.0, 
+                            new Color8Bit(Color.kGreenYellow)));
+
+    upper_right_angle_lig = root_front_right.append(new MechanismLigament2d("drive1_front_right_angle", 1.0, 90.0, 7.0, 
+                            new Color8Bit(Color.kCornflowerBlue)));
+    upper_left_angle_lig = root_front_left.append(new MechanismLigament2d("drive2_front_left_angle", 1.0, 90.0, 7.0,
+                            new Color8Bit(Color.kCornflowerBlue)));
+    lower_left_angle_lig = root_lower_left.append(new MechanismLigament2d("drive3_lower_left_angle", 1.0, 90.0, 7.0,
+                            new Color8Bit(Color.kCornflowerBlue)));
+    lower_right_angle_lig = root_lower_right.append(new MechanismLigament2d("drive4_lower_right_angle", 1.0, 90.0, 7.0,
+                            new Color8Bit(Color.kCornflowerBlue)));
+
+
+    upper_right_speed_lig = root_front_right.append(new MechanismLigament2d("drive1_front_right_speed", 0.0, 90.0, 2.0, 
+                            new Color8Bit(Color.kHotPink)));
+    upper_left_speed_lig = root_front_left.append(new MechanismLigament2d("drive2_front_left_speed", 0.0, 90.0, 2.0,
+                            new Color8Bit(Color.kHotPink)));
+    lower_left_speed_lig = root_lower_left.append(new MechanismLigament2d("drive3_lower_left_speed", 0.0, 90.0, 2.0,
+                            new Color8Bit(Color.kHotPink)));
+    lower_right_speed_lig = root_lower_right.append(new MechanismLigament2d("drive4_lower_right_speed", 0.0, 90.0, 2.0,
+                            new Color8Bit(Color.kHotPink)));
+
+
+
+    SmartDashboard.putData("Field", m_field);
+    SmartDashboard.putData("Mech2d", mech_swerve);
+
+
+  }
+
+  @Override
+  public void periodic()
+  {
+      // This will get the simulated sensor readings that we set
+  // in the previous article while in simulation, but will use
+  // real values on the robot itself.
+//   m_odometry.update(m_gyro.getRotation2d(),
+//   m_leftEncoder.getDistance(),
+//   m_rightEncoder.getDistance());
+// m_field.setRobotPose(m_odometry.getPoseMeters());
+
   }
 
   public void setSpeed(double fwd, double str, double rcw) {
+  
+
+    System.out.println(" speed " + fwd + " " + str + " " + rcw );
+
+
     double rcw_fwd = rcw * Math.sin(DriveTrainConstants.THETA);
     double rcw_str = rcw * Math.cos(DriveTrainConstants.THETA);
 
@@ -168,6 +274,26 @@ public class DriveTrain extends SubsystemBase {
 
     double flippedSpeed4 = flipAngleAndSpeed4[1];
     double flippedAngle4 = flipAngleAndSpeed4[0];
+
+    System.out.println("angles" + flippedAngle1 + " " + flippedAngle2 + " " + flippedAngle3 + " " + flippedAngle4);
+
+    upper_right_speed_lig.setLength(flippedSpeed1);
+    upper_right_speed_lig.setAngle(Units.radiansToDegrees(flippedAngle1) + 90.0);
+    upper_right_angle_lig.setAngle(Units.radiansToDegrees(flippedAngle1) + 90.0);
+
+    upper_left_speed_lig.setLength(flippedSpeed2);
+    upper_left_speed_lig.setAngle(Units.radiansToDegrees(flippedAngle2) + 90.0);
+    upper_left_angle_lig.setAngle(Units.radiansToDegrees(flippedAngle2) + 90.0);
+
+    lower_left_speed_lig.setLength(flippedSpeed3);
+    lower_left_speed_lig.setAngle(Units.radiansToDegrees(flippedAngle3) + 90.0);
+    lower_left_angle_lig.setAngle(Units.radiansToDegrees(flippedAngle3) + 90.0);
+
+    lower_right_speed_lig.setLength(flippedSpeed4);
+    lower_right_speed_lig.setAngle(Units.radiansToDegrees(flippedAngle4) + 90.0);
+    lower_right_angle_lig.setAngle(Units.radiansToDegrees(flippedAngle4) + 90.0);
+
+
 
     // set all wheel speeds
     // TODO: limit speed in case speed goes over 1
