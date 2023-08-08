@@ -345,20 +345,22 @@ public class DriveTrain extends SubsystemBase {
 
 
   public static double[] flipAngle(double currentAngle, double targetAngle, double speed) {
-    double[] changedValues = new double[2];
-    double desiredAngle = targetAngle;
-    double desiredSpeed = speed;
-    if (Math.abs(targetAngle - currentAngle) > Units.degreesToRadians(90)
-        && Math.abs(targetAngle - currentAngle) < Units.degreesToRadians(270)) {
-      desiredAngle += Units.degreesToRadians(180);
-      if (desiredAngle > Units.degreesToRadians(180)) {
-        desiredAngle -= Units.degreesToRadians(360);
-      }
-      desiredSpeed *= -1;
-    }
-    changedValues[0] = desiredAngle;
-    changedValues[1] = desiredSpeed;
-    return changedValues;
+    // double[] changedValues = new double[2];
+    // double desiredAngle = targetAngle;
+    // double desiredSpeed = speed;
+    // if (Math.abs(targetAngle - currentAngle) > Units.degreesToRadians(90)
+    //     && Math.abs(targetAngle - currentAngle) < Units.degreesToRadians(270)) {
+    //   desiredAngle += Units.degreesToRadians(180);
+    //   if (desiredAngle > Units.degreesToRadians(180)) {
+    //     desiredAngle -= Units.degreesToRadians(360);
+    //   }
+    //   desiredSpeed *= -1;
+    // }
+    // changedValues[0] = desiredAngle;
+    // changedValues[1] = desiredSpeed;
+    // return changedValues;
+    double[] values = {targetAngle, speed};
+    return values; 
   }
 // convert zero to 2pi range to negative pi to pi range
   public static double convertFromSparkMaxAngle(double currentAngle){

@@ -43,15 +43,15 @@ public class RobotContainer {
       joystick.getRawAxis(JoystickConstants.RCW_AXIS)), m_driveTrain));
     
     //button that sets all wheels to 0 degrees (homing position)
-    new JoystickButton(joystick, 1).onTrue(
-        new InstantCommand(() -> DriveTrain.setWheelAngles(0,0,0,0))); 
+    new JoystickButton(joystick, 1).whileTrue(
+        new RunCommand(() -> DriveTrain.setWheelAngles(0,0,0,0), m_driveTrain)); 
 
     //button that sets the wheels into lock position (an X)
-    new JoystickButton(joystick, 2).onTrue( new InstantCommand(() -> DriveTrain.setWheelAngles(
+    new JoystickButton(joystick, 2).whileTrue( new RunCommand(() -> DriveTrain.setWheelAngles(
           Units.degreesToRadians(45),
           Units.degreesToRadians(-45),
           Units.degreesToRadians(45),
-          Units.degreesToRadians(-45)))); 
+          Units.degreesToRadians(-45)), m_driveTrain)); 
    //TODO: tune joysticks (add deadband, square value maybe, etc)
   }
 
