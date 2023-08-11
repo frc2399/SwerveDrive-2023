@@ -38,7 +38,7 @@ public class RobotContainer {
  
   private void configureBindings() {
    m_driveTrain.setDefaultCommand(new RunCommand(() -> m_driveTrain.setSpeed(
-      joystick.getRawAxis(JoystickConstants.FWD_AXIS), 
+      -joystick.getRawAxis(JoystickConstants.FWD_AXIS), 
       joystick.getRawAxis(JoystickConstants.STR_AXIS), 
       joystick.getRawAxis(JoystickConstants.RCW_AXIS)), m_driveTrain));
     
@@ -47,7 +47,7 @@ public class RobotContainer {
         new RunCommand(() -> DriveTrain.setWheelAngles(0,0,0,0), m_driveTrain)); 
 
     //button that sets the wheels into lock position (an X)
-    new JoystickButton(joystick, 2).whileTrue( new RunCommand(() -> DriveTrain.setWheelAngles(
+    new JoystickButton(joystick, 9).whileTrue( new RunCommand(() -> DriveTrain.setWheelAngles(
           Units.degreesToRadians(45),
           Units.degreesToRadians(-45),
           Units.degreesToRadians(45),
