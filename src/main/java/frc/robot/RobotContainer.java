@@ -37,10 +37,11 @@ public class RobotContainer {
 
  
   private void configureBindings() {
+    //test deadband
    m_driveTrain.setDefaultCommand(new RunCommand(() -> m_driveTrain.setSpeed(
-      -joystick.getRawAxis(JoystickConstants.FWD_AXIS), 
-      joystick.getRawAxis(JoystickConstants.STR_AXIS), 
-      joystick.getRawAxis(JoystickConstants.RCW_AXIS)), m_driveTrain));
+      -computeDeadband(joystick.getRawAxis(JoystickConstants.FWD_AXIS), 0.02), 
+      computeDeadband(joystick.getRawAxis(JoystickConstants.STR_AXIS), 0.02),  
+     computeDeadband(joystick.getRawAxis(JoystickConstants.RCW_AXIS), 0.02)) , m_driveTrain));
     
     //button that sets all wheels to 0 degrees (homing position)
     new JoystickButton(joystick, 1).whileTrue(
@@ -65,4 +66,14 @@ public class RobotContainer {
     return null;
   }
 
+
+  //computing deadband
+  public static double computeDeadband(double x, double deadband) {
+    if (Math.abs(x) <= deadband) { 
+        return 0; 
+    }
+    else {
+        return x;
+    }
+  }
 }

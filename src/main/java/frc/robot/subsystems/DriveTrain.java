@@ -33,7 +33,7 @@ public class DriveTrain extends SubsystemBase {
   //public static CANSparkMax steer1;
   public static CANSparkMax drive1;
 
-  public static CANSparkMax steer2;
+  //public static CANSparkMax steer2;
   public static CANSparkMax drive2;
 
   public static CANSparkMax steer3;
@@ -43,7 +43,7 @@ public class DriveTrain extends SubsystemBase {
   public static CANSparkMax drive4;
 
   //public static SparkMaxAbsoluteEncoder encoder1;
-  public static SparkMaxAbsoluteEncoder encoder2;
+  //public static SparkMaxAbsoluteEncoder encoder2;
   public static SparkMaxAbsoluteEncoder encoder3;
   public static SparkMaxAbsoluteEncoder encoder4;
 
@@ -78,7 +78,7 @@ public class DriveTrain extends SubsystemBase {
     drive1 = new CANSparkMax(31, MotorType.kBrushless);
 
     //left front
-    steer2 = new CANSparkMax(12, MotorType.kBrushless);
+    //steer2 = new CANSparkMax(12, MotorType.kBrushless);
     drive2 = new CANSparkMax(11, MotorType.kBrushless);
 
     //left back
@@ -97,7 +97,7 @@ public class DriveTrain extends SubsystemBase {
 
     //steering factory resets
     //steer1.restoreFactoryDefaults();
-    steer2.restoreFactoryDefaults();
+    //steer2.restoreFactoryDefaults();
     steer3.restoreFactoryDefaults();
     steer4.restoreFactoryDefaults();
 
@@ -109,7 +109,7 @@ public class DriveTrain extends SubsystemBase {
 
     //steer current limits
     //steer1.setSmartCurrentLimit(20);
-    steer2.setSmartCurrentLimit(0);
+   //steer2.setSmartCurrentLimit(0);
     steer3.setSmartCurrentLimit(20);
     steer4.setSmartCurrentLimit(20);
 
@@ -121,62 +121,62 @@ public class DriveTrain extends SubsystemBase {
 
     //steering motor inversion 
     //steer1.setInverted(true);
-    steer2.setInverted(true);
+    //steer2.setInverted(true);
     steer3.setInverted(true);
     steer4.setInverted(true);
 
     // steering encoders
     //encoder1 = steer1.getAbsoluteEncoder(Type.kDutyCycle);
-    encoder2 = steer2.getAbsoluteEncoder(Type.kDutyCycle);
+    //encoder2 = steer2.getAbsoluteEncoder(Type.kDutyCycle);
     encoder3 = steer3.getAbsoluteEncoder(Type.kDutyCycle);
     encoder4 = steer4.getAbsoluteEncoder(Type.kDutyCycle);
 
     //encoder1.setInverted(false);
-    encoder2.setInverted(false);
+    //encoder2.setInverted(false);
     encoder3.setInverted(false);
     encoder4.setInverted(false);
 
     
     //encoder1.setPositionConversionFactor(2 * Math.PI);
-    encoder2.setPositionConversionFactor(2 * Math.PI);
+    //encoder2.setPositionConversionFactor(2 * Math.PI);
     encoder3.setPositionConversionFactor(2 * Math.PI);
     encoder4.setPositionConversionFactor(2 * Math.PI);
 
     //encoder1.setZeroOffset(convertToSparkMaxAngle(0 + DriveTrainConstants.ENCODER1_OFFSET));
-    encoder2.setZeroOffset(convertToSparkMaxAngle(Math.PI/2 + DriveTrainConstants.ENCODER2_OFFSET));
+    //encoder2.setZeroOffset(convertToSparkMaxAngle(Math.PI/2 + DriveTrainConstants.ENCODER2_OFFSET));
     encoder3.setZeroOffset(convertToSparkMaxAngle(Math.PI + DriveTrainConstants.ENCODER3_OFFSET));
     encoder4.setZeroOffset(convertToSparkMaxAngle(-Math.PI/2 + DriveTrainConstants.ENCODER4_OFFSET));
 
     // steering pid controllers
     //var controller1 = steer1.getPIDController();
-    var controller2 = steer2.getPIDController();
+   // var controller2 = steer2.getPIDController();
     var controller3 = steer3.getPIDController();
     var controller4 = steer4.getPIDController();
 
     // giving the controller an encoder to read values from
     //controller1.setFeedbackDevice(encoder1);
-    controller2.setFeedbackDevice(encoder2);
+    //controller2.setFeedbackDevice(encoder2);
     controller3.setFeedbackDevice(encoder3);
     controller4.setFeedbackDevice(encoder4);
 
     // if the sensor value is greater than 360, it wraps the number such that the
     // value is between 0 and 360
     //controller1.setPositionPIDWrappingEnabled(true);
-    controller2.setPositionPIDWrappingEnabled(true);
+    //controller2.setPositionPIDWrappingEnabled(true);
     controller3.setPositionPIDWrappingEnabled(true);
     controller4.setPositionPIDWrappingEnabled(true);
 
     // sets P gain for the PID loop
     // TODO: tune the P gain
     //controller1.setP(1);
-    controller2.setP(1);
+    //controller2.setP(1);
     controller3.setP(1);
     controller4.setP(1);
 
     // gives the controller a target value that is a position. since this is in the
     // constructor, we set the target to 0 so that the robot does not move
     //controller1.setReference(convertToSparkMaxAngle(0), ControlType.kPosition);
-    controller2.setReference(convertToSparkMaxAngle(0), ControlType.kPosition);
+    //controller2.setReference(convertToSparkMaxAngle(0), ControlType.kPosition);
     controller3.setReference(convertToSparkMaxAngle(0), ControlType.kPosition);
     controller4.setReference(convertToSparkMaxAngle(0), ControlType.kPosition);
 
@@ -268,7 +268,7 @@ public class DriveTrain extends SubsystemBase {
     double str4 = str - rcw_str;
 
     double currentAngle1 = 0; //encoder1.getPosition();
-    double currentAngle2 = encoder2.getPosition();
+    double currentAngle2 = 0; //encoder2.getPosition();
     double currentAngle3 = encoder3.getPosition();
     double currentAngle4 = encoder4.getPosition();
 
@@ -337,11 +337,11 @@ public class DriveTrain extends SubsystemBase {
 
     if (flippedSpeed2 != 0) {
       drive2.set(flippedSpeed2 * 0.1);
-      steer2.getPIDController().setReference(convertToSparkMaxAngle(flippedAngle2), ControlType.kPosition);
+      //steer2.getPIDController().setReference(convertToSparkMaxAngle(flippedAngle2), ControlType.kPosition);
 
     } else {
       drive2.set(0);
-      steer2.set(0);
+      //steer2.set(0);
     }
 
     if (flippedSpeed3 != 0) {
@@ -366,7 +366,7 @@ public class DriveTrain extends SubsystemBase {
 
   public static void setWheelAngles(double angle1, double angle2, double angle3, double angle4) {
     //steer1.getPIDController().setReference(convertToSparkMaxAngle(angle1), ControlType.kPosition);
-    steer2.getPIDController().setReference(convertToSparkMaxAngle(angle2), ControlType.kPosition);
+    //steer2.getPIDController().setReference(convertToSparkMaxAngle(angle2), ControlType.kPosition);
     steer3.getPIDController().setReference(convertToSparkMaxAngle(angle3), ControlType.kPosition);
     steer4.getPIDController().setReference(convertToSparkMaxAngle(angle4), ControlType.kPosition);
   }
@@ -423,7 +423,7 @@ public class DriveTrain extends SubsystemBase {
       angle-=Math.PI*2;
     }
     return angle;
-    
-  
   }
+
+
 }
