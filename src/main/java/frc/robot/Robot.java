@@ -4,9 +4,12 @@
 
 package frc.robot;
 
+import com.revrobotics.CANSparkMax.IdleMode;
+
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.subsystems.DriveTrain;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -48,7 +51,18 @@ public class Robot extends TimedRobot {
 
   /** This function is called once each time the robot enters Disabled mode. */
   @Override
-  public void disabledInit() {}
+  public void disabledInit() {
+    DriveTrain.drive1.setIdleMode(IdleMode.kBrake);
+    DriveTrain.drive2.setIdleMode(IdleMode.kBrake);
+    DriveTrain.drive3.setIdleMode(IdleMode.kBrake);
+    DriveTrain.drive4.setIdleMode(IdleMode.kBrake);
+
+    DriveTrain.steer1.setIdleMode(IdleMode.kBrake);
+    DriveTrain.steer2.setIdleMode(IdleMode.kBrake);
+    DriveTrain.steer3.setIdleMode(IdleMode.kBrake);
+    DriveTrain.steer4.setIdleMode(IdleMode.kBrake);
+
+  }
 
   @Override
   public void disabledPeriodic() {}
@@ -56,6 +70,16 @@ public class Robot extends TimedRobot {
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
+    DriveTrain.drive1.setIdleMode(IdleMode.kBrake);
+    DriveTrain.drive2.setIdleMode(IdleMode.kBrake);
+    DriveTrain.drive3.setIdleMode(IdleMode.kBrake);
+    DriveTrain.drive4.setIdleMode(IdleMode.kBrake);
+
+    DriveTrain.steer1.setIdleMode(IdleMode.kBrake);
+    DriveTrain.steer2.setIdleMode(IdleMode.kBrake);
+    DriveTrain.steer3.setIdleMode(IdleMode.kBrake);
+    DriveTrain.steer4.setIdleMode(IdleMode.kBrake);
+    
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
     // schedule the autonomous command (example)
@@ -74,6 +98,16 @@ public class Robot extends TimedRobot {
     // teleop starts running. If you want the autonomous to
     // continue until interrupted by another command, remove
     // this line or comment it out.
+    DriveTrain.drive1.setIdleMode(IdleMode.kCoast);
+    DriveTrain.drive2.setIdleMode(IdleMode.kCoast);
+    DriveTrain.drive3.setIdleMode(IdleMode.kCoast);
+    DriveTrain.drive4.setIdleMode(IdleMode.kCoast);
+
+    DriveTrain.steer1.setIdleMode(IdleMode.kCoast);
+    DriveTrain.steer2.setIdleMode(IdleMode.kCoast);
+    DriveTrain.steer3.setIdleMode(IdleMode.kCoast);
+    DriveTrain.steer4.setIdleMode(IdleMode.kCoast);
+
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }

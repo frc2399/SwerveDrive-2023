@@ -5,28 +5,17 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.CANSparkMax;
-import com.revrobotics.SparkMaxAbsoluteEncoder;
 import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import com.revrobotics.SparkMaxAbsoluteEncoder;
 import com.revrobotics.SparkMaxAbsoluteEncoder.Type;
 
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
-import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.util.Color;
-import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DriveTrainConstants;
-
-import edu.wpi.first.math.kinematics.SwerveModulePosition;
-
-
-import frc.robot.util.NavX.AHRS;
 
 public class DriveTrain extends SubsystemBase {
   /** Creates a new ExampleSubsystem. */
@@ -166,6 +155,16 @@ public class DriveTrain extends SubsystemBase {
     controller3.setPositionPIDWrappingEnabled(true);
     controller4.setPositionPIDWrappingEnabled(true);
 
+    //setting max and min inputs for encoder positions
+    controller1.setPositionPIDWrappingMinInput(DriveTrainConstants.kTurningEncoderPositionPIDMinInput);
+    controller1.setPositionPIDWrappingMaxInput(DriveTrainConstants.kTurningEncoderPositionPIDMaxInput);
+    controller2.setPositionPIDWrappingMinInput(DriveTrainConstants.kTurningEncoderPositionPIDMinInput);
+    controller2.setPositionPIDWrappingMaxInput(DriveTrainConstants.kTurningEncoderPositionPIDMaxInput);
+    controller3.setPositionPIDWrappingMinInput(DriveTrainConstants.kTurningEncoderPositionPIDMinInput);
+    controller3.setPositionPIDWrappingMaxInput(DriveTrainConstants.kTurningEncoderPositionPIDMaxInput);
+    controller4.setPositionPIDWrappingMinInput(DriveTrainConstants.kTurningEncoderPositionPIDMinInput);
+    controller4.setPositionPIDWrappingMaxInput(DriveTrainConstants.kTurningEncoderPositionPIDMaxInput);
+
     // sets P gain for the PID loop
     // TODO: tune the P gain
     controller1.setP(1);
@@ -179,56 +178,6 @@ public class DriveTrain extends SubsystemBase {
     controller2.setReference(convertToSparkMaxAngle(0), ControlType.kPosition);
     controller3.setReference(convertToSparkMaxAngle(0), ControlType.kPosition);
     controller4.setReference(convertToSparkMaxAngle(0), ControlType.kPosition);
-
-    // the main mechanism object
-    Mechanism2d mech_swerve = new Mechanism2d(10, 10);
-    // the mechanism root node
-    MechanismRoot2d root_front_right = mech_swerve.getRoot("drive1_front_right", 7.5, 7.5);
-    MechanismRoot2d root_front_left = mech_swerve.getRoot("drive2_front_left", 2.5, 7.5);
-    MechanismRoot2d root_lower_left = mech_swerve.getRoot("drive3_lower_left", 2.5, 2.5);
-    MechanismRoot2d root_lower_right = mech_swerve.getRoot("drive4_lower_right", 7.5, 2.5);
-
-    // create something to show the center
-    MechanismRoot2d root_front_right_center = mech_swerve.getRoot("root_front_right_center", 7.45, 7.5);
-    root_front_right_center.append(new MechanismLigament2d("drive1_front_right_center", 0.1, 0.0, 5.0, 
-                            new Color8Bit(Color.kGreenYellow)));
-
-    MechanismRoot2d root_front_left_center = mech_swerve.getRoot("root_front_left_center", 2.45, 7.5);
-    root_front_left_center.append(new MechanismLigament2d("root_front_left_center", 0.1, 0.0, 5.0, 
-                            new Color8Bit(Color.kGreenYellow)));
-
-    MechanismRoot2d root_lower_left_center = mech_swerve.getRoot("root_lower_left_center", 2.45, 2.5);
-    root_lower_left_center.append(new MechanismLigament2d("root_lower_left_center", 0.1, 0.0, 5.0, 
-                            new Color8Bit(Color.kGreenYellow)));
-
-    MechanismRoot2d root_lower_right_center = mech_swerve.getRoot("root_lower_right_center", 7.45, 2.5);
-    root_lower_right_center.append(new MechanismLigament2d("root_lower_right_center", 0.1, 0.0, 5.0, 
-                            new Color8Bit(Color.kGreenYellow)));
-
-    upper_right_angle_lig = root_front_right.append(new MechanismLigament2d("drive1_front_right_angle", 1.0, 90.0, 7.0, 
-                            new Color8Bit(Color.kCornflowerBlue)));
-    upper_left_angle_lig = root_front_left.append(new MechanismLigament2d("drive2_front_left_angle", 1.0, 90.0, 7.0,
-                            new Color8Bit(Color.kCornflowerBlue)));
-    lower_left_angle_lig = root_lower_left.append(new MechanismLigament2d("drive3_lower_left_angle", 1.0, 90.0, 7.0,
-                            new Color8Bit(Color.kCornflowerBlue)));
-    lower_right_angle_lig = root_lower_right.append(new MechanismLigament2d("drive4_lower_right_angle", 1.0, 90.0, 7.0,
-                            new Color8Bit(Color.kCornflowerBlue)));
-
-
-    upper_right_speed_lig = root_front_right.append(new MechanismLigament2d("drive1_front_right_speed", 0.0, 90.0, 2.0, 
-                            new Color8Bit(Color.kHotPink)));
-    upper_left_speed_lig = root_front_left.append(new MechanismLigament2d("drive2_front_left_speed", 0.0, 90.0, 2.0,
-                            new Color8Bit(Color.kHotPink)));
-    lower_left_speed_lig = root_lower_left.append(new MechanismLigament2d("drive3_lower_left_speed", 0.0, 90.0, 2.0,
-                            new Color8Bit(Color.kHotPink)));
-    lower_right_speed_lig = root_lower_right.append(new MechanismLigament2d("drive4_lower_right_speed", 0.0, 90.0, 2.0,
-                            new Color8Bit(Color.kHotPink)));
-
-
-
-    SmartDashboard.putData("Field", m_field);
-    SmartDashboard.putData("Mech2d", mech_swerve);
-
 
   }
 
@@ -268,16 +217,15 @@ public class DriveTrain extends SubsystemBase {
     double str4 = str - rcw_str;
 
     double currentAngle1 = encoder1.getPosition();
-    SmartDashboard.putNumber("Current angle", currentAngle1);
+    SmartDashboard.putNumber("Current angle", Units.radiansToDegrees(currentAngle1));
     double currentAngle2 = encoder2.getPosition();
     double currentAngle3 = encoder3.getPosition();
     double currentAngle4 = encoder4.getPosition();
 
     // calculate the speed and angle for each wheel
     double speed1 = Math.sqrt(fwd1 * fwd1 + str1 * str1);
-    SmartDashboard.putNumber("Speed", speed1);
     double angle1 = Math.atan2(str1, fwd1);
-    SmartDashboard.putNumber("Target angle", angle1);
+    SmartDashboard.putNumber("Target angle", Units.radiansToDegrees(convertToSparkMaxAngle(angle1)));
     System.out.println("ANGLE 1 VALUE" + angle1);
 
 
@@ -311,28 +259,24 @@ public class DriveTrain extends SubsystemBase {
 
     System.out.println("angles" + flippedAngle1 + " " + flippedAngle2 + " " + flippedAngle3 + " " + flippedAngle4);
 
-    upper_right_speed_lig.setLength(flippedSpeed1);
-    upper_right_speed_lig.setAngle(Units.radiansToDegrees(flippedAngle1) + 90.0);
-    upper_right_angle_lig.setAngle(Units.radiansToDegrees(flippedAngle1) + 90.0);
+    //limiting speeds in case they go over 1 (normalize or desaturate)
+    double speedProportion = 1;
+    double maxSpeed = Math.max(Math.abs(flippedSpeed1), 
+                      Math.max(Math.abs(flippedSpeed2), 
+                      Math.max(Math.abs(flippedSpeed3), Math.abs(flippedSpeed4))));
+    if (maxSpeed > 1)
+    {
+      speedProportion = maxSpeed;
+    }
 
-    upper_left_speed_lig.setLength(flippedSpeed2);
-    upper_left_speed_lig.setAngle(Units.radiansToDegrees(flippedAngle2) + 90.0);
-    upper_left_angle_lig.setAngle(Units.radiansToDegrees(flippedAngle2) + 90.0);
 
-    lower_left_speed_lig.setLength(flippedSpeed3);
-    lower_left_speed_lig.setAngle(Units.radiansToDegrees(flippedAngle3) + 90.0);
-    lower_left_angle_lig.setAngle(Units.radiansToDegrees(flippedAngle3) + 90.0);
-
-    lower_right_speed_lig.setLength(flippedSpeed4);
-    lower_right_speed_lig.setAngle(Units.radiansToDegrees(flippedAngle4) + 90.0);
-    lower_right_angle_lig.setAngle(Units.radiansToDegrees(flippedAngle4) + 90.0);
-
-    
-
+    SmartDashboard.putNumber("Max Speed", maxSpeed);
+    SmartDashboard.putNumber("Speed 1", flippedSpeed1/speedProportion);
+  
     // set all wheel speeds
     // TODO: limit speed in case speed goes over 1
     if (flippedSpeed1 != 0) {
-      drive1.set(flippedSpeed1 * 0.1);
+      drive1.set(flippedSpeed1/speedProportion * 0.3);
       steer1.getPIDController().setReference(convertToSparkMaxAngle(flippedAngle1), ControlType.kPosition);
 
     } else {
@@ -341,7 +285,7 @@ public class DriveTrain extends SubsystemBase {
     }
 
     if (flippedSpeed2 != 0) {
-      drive2.set(flippedSpeed2 * 0.1);
+      drive2.set(flippedSpeed2/speedProportion * 0.3);
       steer2.getPIDController().setReference(convertToSparkMaxAngle(flippedAngle2), ControlType.kPosition);
 
     } else {
@@ -350,7 +294,7 @@ public class DriveTrain extends SubsystemBase {
     }
 
     if (flippedSpeed3 != 0) {
-      drive3.set(flippedSpeed3 * 0.1);
+      drive3.set(flippedSpeed3/speedProportion * 0.3);
       steer3.getPIDController().setReference(convertToSparkMaxAngle(flippedAngle3), ControlType.kPosition);
 
     } else {
@@ -359,7 +303,7 @@ public class DriveTrain extends SubsystemBase {
     }
 
     if (flippedSpeed4 != 0) {
-      drive4.set(flippedSpeed4 * 0.1);
+      drive4.set(flippedSpeed4/speedProportion * 0.3);
       steer4.getPIDController().setReference(convertToSparkMaxAngle(flippedAngle4), ControlType.kPosition);
 
     } else {
@@ -379,22 +323,22 @@ public class DriveTrain extends SubsystemBase {
 
 
   public static double[] flipAngle(double currentAngle, double targetAngle, double speed) {
-    double[] changedValues = new double[2];
-    double desiredAngle = targetAngle;
-    double desiredSpeed = speed;
-    if (Math.abs(targetAngle - currentAngle) > Units.degreesToRadians(90)
-        && Math.abs(targetAngle - currentAngle) < Units.degreesToRadians(270)) {
-      desiredAngle += Units.degreesToRadians(180);
-      if (desiredAngle > Units.degreesToRadians(180)) {
-        desiredAngle -= Units.degreesToRadians(360);
-      }
-      desiredSpeed *= -1;
-    }
-    changedValues[0] = desiredAngle;
-    changedValues[1] = desiredSpeed;
-    return changedValues;
-    // double[] values = {targetAngle, speed};
-    // return values; 
+    // double[] changedValues = new double[2];
+    // double desiredAngle = targetAngle;
+    // double desiredSpeed = speed;
+    // if (Math.abs(targetAngle - currentAngle) > Units.degreesToRadians(90)
+    //     && Math.abs(targetAngle - currentAngle) < Units.degreesToRadians(270)) {
+    //   desiredAngle += Units.degreesToRadians(180);
+    //   if (desiredAngle > Units.degreesToRadians(180)) {
+    //     desiredAngle -= Units.degreesToRadians(360);
+    //   }
+    //   desiredSpeed *= -1;
+    // }
+    // changedValues[0] = desiredAngle;
+    // changedValues[1] = desiredSpeed;
+    // return changedValues;
+    double[] values = {targetAngle, speed};
+    return values; 
   }
 // convert zero to 2pi range to negative pi to pi range
   public static double convertFromSparkMaxAngle(double currentAngle){

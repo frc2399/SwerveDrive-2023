@@ -27,6 +27,10 @@ public final class Constants {
     //angle formed by the half length and radius of the robot, in radians 
     public static final double THETA = Math.acos(HALF_LENGTH / RADIUS); 
 
+    public static final double kTurningEncoderPositionPIDMinInput = 0;
+    public static final double kTurningEncoderPositionPIDMaxInput = 2 * Math.PI; 
+
+
 
     public static final SwerveDriveKinematics kDriveKinematics = new SwerveDriveKinematics(
       new Translation2d(HALF_LENGTH, HALF_WIDTH),
