@@ -57,7 +57,6 @@ public class RobotContainer {
           Units.degreesToRadians(-45),
           Units.degreesToRadians(45),
           Units.degreesToRadians(-45)), m_driveTrain)); 
-   //TODO: tune joysticks (add deadband, square value maybe, etc)
   }
 
   /**

@@ -6,13 +6,12 @@ package frc.robot.subsystems;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.ControlType;
+import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.SparkMaxAbsoluteEncoder;
 import com.revrobotics.SparkMaxAbsoluteEncoder.Type;
 
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DriveTrainConstants;
@@ -36,29 +35,6 @@ public class DriveTrain extends SubsystemBase {
   public static SparkMaxAbsoluteEncoder encoder3;
   public static SparkMaxAbsoluteEncoder encoder4;
 
-  private Field2d m_field = new Field2d();
-
-  private MechanismLigament2d upper_right_angle_lig;
-  private MechanismLigament2d upper_left_angle_lig;
-  private MechanismLigament2d lower_left_angle_lig;
-  private MechanismLigament2d lower_right_angle_lig;
-
-  private MechanismLigament2d upper_right_speed_lig;
-  private MechanismLigament2d upper_left_speed_lig;
-  private MechanismLigament2d lower_left_speed_lig;
-  private MechanismLigament2d lower_right_speed_lig;
-
-
-  // Odometry class for tracking robot pose
-  // SwerveDriveOdometry m_odometry = new SwerveDriveOdometry(
-  //   DriveTrainConstants.kDriveKinematics,
-  //     Rotation2d.fromDegrees(m_gyro.getAngle()),
-  //     new SwerveModulePosition[] {
-  //         drive1.getPosition(),
-  //         drive2.getPosition(),
-  //         drive3.getPosition(),
-  //         drive4.getPosition()
-  //     });
 
   public DriveTrain() {
 
@@ -113,6 +89,16 @@ public class DriveTrain extends SubsystemBase {
     steer2.setInverted(true);
     steer3.setInverted(true);
     steer4.setInverted(true);
+
+    drive1.setIdleMode(IdleMode.kBrake);
+    drive2.setIdleMode(IdleMode.kBrake);
+    drive3.setIdleMode(IdleMode.kBrake);
+    drive4.setIdleMode(IdleMode.kBrake);
+
+    steer1.setIdleMode(IdleMode.kBrake);
+    steer2.setIdleMode(IdleMode.kBrake);
+    steer3.setIdleMode(IdleMode.kBrake);
+    steer4.setIdleMode(IdleMode.kBrake);
 
     // steering encoders
     encoder1 = steer1.getAbsoluteEncoder(Type.kDutyCycle);
@@ -196,10 +182,6 @@ public class DriveTrain extends SubsystemBase {
 
   public void setSpeed(double fwd, double str, double rcw) {
   
-
-    System.out.println(" speed " + fwd + " " + str + " " + rcw );
-
-
     double rcw_fwd = rcw * Math.sin(DriveTrainConstants.THETA);
     double rcw_str = rcw * Math.cos(DriveTrainConstants.THETA);
 
@@ -226,8 +208,6 @@ public class DriveTrain extends SubsystemBase {
     double speed1 = Math.sqrt(fwd1 * fwd1 + str1 * str1);
     double angle1 = Math.atan2(str1, fwd1);
     SmartDashboard.putNumber("Target angle", Units.radiansToDegrees(convertToSparkMaxAngle(angle1)));
-    System.out.println("ANGLE 1 VALUE" + angle1);
-
 
     double speed2 = Math.sqrt(fwd2 * fwd2 + str2 * str2);
     double angle2 = Math.atan2(str2, fwd2);
@@ -256,8 +236,6 @@ public class DriveTrain extends SubsystemBase {
 
     double flippedSpeed4 = flipAngleAndSpeed4[1];
     double flippedAngle4 = flipAngleAndSpeed4[0];
-
-    System.out.println("angles" + flippedAngle1 + " " + flippedAngle2 + " " + flippedAngle3 + " " + flippedAngle4);
 
     //limiting speeds in case they go over 1 (normalize or desaturate)
     double speedProportion = 1;
@@ -323,22 +301,22 @@ public class DriveTrain extends SubsystemBase {
 
 
   public static double[] flipAngle(double currentAngle, double targetAngle, double speed) {
-    // double[] changedValues = new double[2];
-    // double desiredAngle = targetAngle;
-    // double desiredSpeed = speed;
-    // if (Math.abs(targetAngle - currentAngle) > Units.degreesToRadians(90)
-    //     && Math.abs(targetAngle - currentAngle) < Units.degreesToRadians(270)) {
-    //   desiredAngle += Units.degreesToRadians(180);
-    //   if (desiredAngle > Units.degreesToRadians(180)) {
-    //     desiredAngle -= Units.degreesToRadians(360);
-    //   }
-    //   desiredSpeed *= -1;
-    // }
-    // changedValues[0] = desiredAngle;
-    // changedValues[1] = desiredSpeed;
-    // return changedValues;
-    double[] values = {targetAngle, speed};
-    return values; 
+    double[] changedValues = new double[2];
+    double desiredAngle = targetAngle;
+    double desiredSpeed = speed;
+    if (Math.abs(targetAngle - currentAngle) > Units.degreesToRadians(90)
+        && Math.abs(targetAngle - currentAngle) < Units.degreesToRadians(270)) {
+      desiredAngle += Units.degreesToRadians(180);
+      if (desiredAngle > Units.degreesToRadians(180)) {
+        desiredAngle -= Units.degreesToRadians(360);
+      }
+      desiredSpeed *= -1;
+    }
+    changedValues[0] = desiredAngle;
+    changedValues[1] = desiredSpeed;
+    return changedValues;
+    // double[] values = {targetAngle, speed};
+    // return values; 
   }
 // convert zero to 2pi range to negative pi to pi range
   public static double convertFromSparkMaxAngle(double currentAngle){
@@ -359,7 +337,7 @@ public class DriveTrain extends SubsystemBase {
 
 //convert from negative pi to pi range to zero to 2pi range
   public static double convertToSparkMaxAngle(double angle) {
-    System.out.println("current angle " + angle); 
+
     if (angle >= 0 && angle <= Math.PI)
     {
       return angle; 

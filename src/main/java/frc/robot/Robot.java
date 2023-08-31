@@ -98,15 +98,6 @@ public class Robot extends TimedRobot {
     // teleop starts running. If you want the autonomous to
     // continue until interrupted by another command, remove
     // this line or comment it out.
-    DriveTrain.drive1.setIdleMode(IdleMode.kCoast);
-    DriveTrain.drive2.setIdleMode(IdleMode.kCoast);
-    DriveTrain.drive3.setIdleMode(IdleMode.kCoast);
-    DriveTrain.drive4.setIdleMode(IdleMode.kCoast);
-
-    DriveTrain.steer1.setIdleMode(IdleMode.kCoast);
-    DriveTrain.steer2.setIdleMode(IdleMode.kCoast);
-    DriveTrain.steer3.setIdleMode(IdleMode.kCoast);
-    DriveTrain.steer4.setIdleMode(IdleMode.kCoast);
 
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
