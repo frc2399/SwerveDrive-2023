@@ -57,6 +57,8 @@ public class RobotContainer {
           Units.degreesToRadians(-45),
           Units.degreesToRadians(45),
           Units.degreesToRadians(-45)), m_driveTrain)); 
+    
+    new JoystickButton(joystick, 8).onTrue( new InstantCommand(() -> DriveTrain.ahrs.reset(), m_driveTrain));
   }
 
   /**

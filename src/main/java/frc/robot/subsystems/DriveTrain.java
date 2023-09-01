@@ -12,9 +12,11 @@ import com.revrobotics.SparkMaxAbsoluteEncoder;
 import com.revrobotics.SparkMaxAbsoluteEncoder.Type;
 
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DriveTrainConstants;
+import frc.robot.util.NavX.AHRS;
 
 public class DriveTrain extends SubsystemBase {
   /** Creates a new ExampleSubsystem. */
@@ -35,8 +37,13 @@ public class DriveTrain extends SubsystemBase {
   public static SparkMaxAbsoluteEncoder encoder3;
   public static SparkMaxAbsoluteEncoder encoder4;
 
+  public static AHRS ahrs;
+
 
   public DriveTrain() {
+
+    ahrs = new AHRS(SPI.Port.kMXP, (byte) 66);
+    ahrs.reset();
 
     //right front
     steer1 = new CANSparkMax(32, MotorType.kBrushless);
@@ -177,11 +184,19 @@ public class DriveTrain extends SubsystemBase {
 //   m_leftEncoder.getDistance(),
 //   m_rightEncoder.getDistance());
 // m_field.setRobotPose(m_odometry.getPoseMeters());
+    SmartDashboard.putNumber("Gyro angle", ahrs.getAngle());
 
   }
 
   public void setSpeed(double fwd, double str, double rcw) {
   
+    //field oriented
+    double angleRad = Math.toRadians(ahrs.getAngle());
+        double temp = fwd * Math.cos(angleRad) +
+                str * Math.sin(angleRad);
+        str = -fwd * Math.sin(angleRad) + str * Math.cos(angleRad);
+        fwd = temp;
+    
     double rcw_fwd = rcw * Math.sin(DriveTrainConstants.THETA);
     double rcw_str = rcw * Math.cos(DriveTrainConstants.THETA);
 
