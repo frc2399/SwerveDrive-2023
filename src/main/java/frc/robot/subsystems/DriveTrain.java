@@ -269,7 +269,7 @@ public class DriveTrain extends SubsystemBase {
     // set all wheel speeds
     // TODO: limit speed in case speed goes over 1
     if (flippedSpeed1 != 0) {
-      drive1.set(flippedSpeed1/speedProportion * 0.3);
+      drive1.set(flippedSpeed1/speedProportion * 0.5);
       steer1.getPIDController().setReference(convertToSparkMaxAngle(flippedAngle1), ControlType.kPosition);
 
     } else {
@@ -278,7 +278,7 @@ public class DriveTrain extends SubsystemBase {
     }
 
     if (flippedSpeed2 != 0) {
-      drive2.set(flippedSpeed2/speedProportion * 0.3);
+      drive2.set(flippedSpeed2/speedProportion * 0.5);
       steer2.getPIDController().setReference(convertToSparkMaxAngle(flippedAngle2), ControlType.kPosition);
 
     } else {
@@ -287,7 +287,7 @@ public class DriveTrain extends SubsystemBase {
     }
 
     if (flippedSpeed3 != 0) {
-      drive3.set(flippedSpeed3/speedProportion * 0.3);
+      drive3.set(flippedSpeed3/speedProportion * 0.5);
       steer3.getPIDController().setReference(convertToSparkMaxAngle(flippedAngle3), ControlType.kPosition);
 
     } else {
@@ -296,7 +296,7 @@ public class DriveTrain extends SubsystemBase {
     }
 
     if (flippedSpeed4 != 0) {
-      drive4.set(flippedSpeed4/speedProportion * 0.3);
+      drive4.set(flippedSpeed4/speedProportion * 0.5);
       steer4.getPIDController().setReference(convertToSparkMaxAngle(flippedAngle4), ControlType.kPosition);
 
     } else {
