@@ -5,12 +5,14 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.RelativeEncoder;
 import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.SparkMaxAbsoluteEncoder;
 import com.revrobotics.SparkMaxAbsoluteEncoder.Type;
 
+import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -32,12 +34,20 @@ public class DriveTrain extends SubsystemBase {
   public static CANSparkMax steer4;
   public static CANSparkMax drive4;
 
-  public static SparkMaxAbsoluteEncoder encoder1;
-  public static SparkMaxAbsoluteEncoder encoder2;
-  public static SparkMaxAbsoluteEncoder encoder3;
-  public static SparkMaxAbsoluteEncoder encoder4;
+  public static SparkMaxAbsoluteEncoder steerEncoder1;
+  public static SparkMaxAbsoluteEncoder steerEncoder2;
+  public static SparkMaxAbsoluteEncoder steerEncoder3;
+  public static SparkMaxAbsoluteEncoder steerEncoder4;
+
+  public static RelativeEncoder driveEncoder1;
+  public static RelativeEncoder driveEncoder2;
+  public static RelativeEncoder driveEncoder3;
+  public static RelativeEncoder driveEncoder4;
 
   public static AHRS ahrs;
+
+  private LinearFilter derivativeCalculator = LinearFilter.backwardFiniteDifference(1, 2, 0.02);
+  private double pitchRate;
 
 
   public DriveTrain() {
@@ -107,27 +117,51 @@ public class DriveTrain extends SubsystemBase {
     steer3.setIdleMode(IdleMode.kBrake);
     steer4.setIdleMode(IdleMode.kBrake);
 
-    // steering encoders
-    encoder1 = steer1.getAbsoluteEncoder(Type.kDutyCycle);
-    encoder2 = steer2.getAbsoluteEncoder(Type.kDutyCycle);
-    encoder3 = steer3.getAbsoluteEncoder(Type.kDutyCycle);
-    encoder4 = steer4.getAbsoluteEncoder(Type.kDutyCycle);
+    // driving encoders
+    driveEncoder1 = drive1.getEncoder();
+    driveEncoder2 = drive2.getEncoder();
+    driveEncoder3 = drive3.getEncoder();
+    driveEncoder4 = drive4.getEncoder();
 
-    encoder1.setInverted(false);
-    encoder2.setInverted(false);
-    encoder3.setInverted(false);
-    encoder4.setInverted(false);
+    driveEncoder1.setPosition(0);
+    driveEncoder2.setPosition(0);
+    driveEncoder3.setPosition(0);
+    driveEncoder4.setPosition(0);
+
+    //native unit is rotations, converting to meters
+    //1 rotation = x wheel revolutions (using gear ratio) = y inches (using circumference) = z meters
+    driveEncoder1.setPositionConversionFactor(0.0508);
+    driveEncoder2.setPositionConversionFactor(0.0508);
+    driveEncoder3.setPositionConversionFactor(0.0508);
+    driveEncoder4.setPositionConversionFactor(0.0508);
+
+    //native unit is RPM, converting to m/s
+    driveEncoder1.setVelocityConversionFactor(0.0508 / 60);
+    driveEncoder2.setVelocityConversionFactor(0.0508 / 60);
+    driveEncoder3.setVelocityConversionFactor(0.0508 / 60);
+    driveEncoder4.setVelocityConversionFactor(0.0508 / 60);
+
+    // steering encoders
+    steerEncoder1 = steer1.getAbsoluteEncoder(Type.kDutyCycle);
+    steerEncoder2 = steer2.getAbsoluteEncoder(Type.kDutyCycle);
+    steerEncoder3 = steer3.getAbsoluteEncoder(Type.kDutyCycle);
+    steerEncoder4 = steer4.getAbsoluteEncoder(Type.kDutyCycle);
+
+    steerEncoder1.setInverted(false);
+    steerEncoder2.setInverted(false);
+    steerEncoder3.setInverted(false);
+    steerEncoder4.setInverted(false);
 
     
-    encoder1.setPositionConversionFactor(2 * Math.PI);
-    encoder2.setPositionConversionFactor(2 * Math.PI);
-    encoder3.setPositionConversionFactor(2 * Math.PI);
-    encoder4.setPositionConversionFactor(2 * Math.PI);
+    steerEncoder1.setPositionConversionFactor(2 * Math.PI);
+    steerEncoder2.setPositionConversionFactor(2 * Math.PI);
+    steerEncoder3.setPositionConversionFactor(2 * Math.PI);
+    steerEncoder4.setPositionConversionFactor(2 * Math.PI);
 
-    encoder1.setZeroOffset(convertToSparkMaxAngle(0 + DriveTrainConstants.ENCODER1_OFFSET));
-    encoder2.setZeroOffset(convertToSparkMaxAngle(Math.PI/2 + DriveTrainConstants.ENCODER2_OFFSET));
-    encoder3.setZeroOffset(convertToSparkMaxAngle(Math.PI + DriveTrainConstants.ENCODER3_OFFSET));
-    encoder4.setZeroOffset(convertToSparkMaxAngle(-Math.PI/2 + DriveTrainConstants.ENCODER4_OFFSET));
+    steerEncoder1.setZeroOffset(convertToSparkMaxAngle(0 + DriveTrainConstants.ENCODER1_OFFSET));
+    steerEncoder2.setZeroOffset(convertToSparkMaxAngle(Math.PI/2 + DriveTrainConstants.ENCODER2_OFFSET));
+    steerEncoder3.setZeroOffset(convertToSparkMaxAngle(Math.PI + DriveTrainConstants.ENCODER3_OFFSET));
+    steerEncoder4.setZeroOffset(convertToSparkMaxAngle(-Math.PI/2 + DriveTrainConstants.ENCODER4_OFFSET));
 
     // steering pid controllers
     var controller1 = steer1.getPIDController();
@@ -136,10 +170,10 @@ public class DriveTrain extends SubsystemBase {
     var controller4 = steer4.getPIDController();
 
     // giving the controller an encoder to read values from
-    controller1.setFeedbackDevice(encoder1);
-    controller2.setFeedbackDevice(encoder2);
-    controller3.setFeedbackDevice(encoder3);
-    controller4.setFeedbackDevice(encoder4);
+    controller1.setFeedbackDevice(steerEncoder1);
+    controller2.setFeedbackDevice(steerEncoder2);
+    controller3.setFeedbackDevice(steerEncoder3);
+    controller4.setFeedbackDevice(steerEncoder4);
 
     // if the sensor value is greater than 360, it wraps the number such that the
     // value is between 0 and 360
@@ -185,11 +219,13 @@ public class DriveTrain extends SubsystemBase {
 //   m_rightEncoder.getDistance());
 // m_field.setRobotPose(m_odometry.getPoseMeters());
     SmartDashboard.putNumber("Gyro angle", ahrs.getAngle());
+    pitchRate = derivativeCalculator.calculate(getGyroPitch());
 
   }
 
   public void setSpeed(double fwd, double str, double rcw) {
   
+    SmartDashboard.putNumber("Encoder position: ", driveEncoder1.getPosition());
     //field oriented
     double angleRad = Math.toRadians(ahrs.getAngle());
         double temp = fwd * Math.cos(angleRad) +
@@ -213,16 +249,16 @@ public class DriveTrain extends SubsystemBase {
     double fwd4 = fwd - rcw_fwd;
     double str4 = str - rcw_str;
 
-    double currentAngle1 = encoder1.getPosition();
-    SmartDashboard.putNumber("Current angle", Units.radiansToDegrees(currentAngle1));
-    double currentAngle2 = encoder2.getPosition();
-    double currentAngle3 = encoder3.getPosition();
-    double currentAngle4 = encoder4.getPosition();
+    double currentAngle1 = steerEncoder1.getPosition();
+    //SmartDashboard.putNumber("Current angle", Units.radiansToDegrees(currentAngle1));
+    double currentAngle2 = steerEncoder2.getPosition();
+    double currentAngle3 = steerEncoder3.getPosition();
+    double currentAngle4 = steerEncoder4.getPosition();
 
     // calculate the speed and angle for each wheel
     double speed1 = Math.sqrt(fwd1 * fwd1 + str1 * str1);
     double angle1 = Math.atan2(str1, fwd1);
-    SmartDashboard.putNumber("Target angle", Units.radiansToDegrees(convertToSparkMaxAngle(angle1)));
+    //SmartDashboard.putNumber("Target angle", Units.radiansToDegrees(convertToSparkMaxAngle(angle1)));
 
     double speed2 = Math.sqrt(fwd2 * fwd2 + str2 * str2);
     double angle2 = Math.atan2(str2, fwd2);
@@ -365,6 +401,27 @@ public class DriveTrain extends SubsystemBase {
       angle-=Math.PI*2;
     }
     return angle;
+  }
+
+  public double getAverageEncoderMeters()
+  {
+    return (driveEncoder1.getPosition() + driveEncoder2.getPosition() + driveEncoder3.getPosition() + driveEncoder4.getPosition()) / 4;
+  }
+
+  public double getGyroPitch() {
+    return -ahrs.getPitch();
+  }
+
+  public double getGyroPitchRate()
+  {
+      return pitchRate;
+  }
+
+  public void setDriveMotorVoltage(double drivePower1, double drivePower2, double drivePower3, double drivePower4) {
+    drive1.setVoltage(drivePower1);
+    drive2.setVoltage(drivePower2);
+    drive3.setVoltage(drivePower3);
+    drive4.setVoltage(drivePower4);
   }
 
 
