@@ -5,6 +5,8 @@
 package frc.robot;
 
 import frc.robot.Constants.JoystickConstants;
+import frc.robot.commands.drivetrain.DriveForwardGivenDistance;
+import frc.robot.commands.drivetrain.StrafeGivenDistance;
 import frc.robot.subsystems.DriveTrain;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Joystick;
@@ -59,6 +61,8 @@ public class RobotContainer {
           Units.degreesToRadians(-45)), m_driveTrain)); 
     
     new JoystickButton(joystick, 8).onTrue( new InstantCommand(() -> DriveTrain.ahrs.reset(), m_driveTrain));
+
+    new JoystickButton(joystick, 7).onTrue( new StrafeGivenDistance(-1, m_driveTrain));
   }
 
   /**
