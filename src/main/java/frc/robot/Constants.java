@@ -16,6 +16,9 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
+
+  public static final int NEO550_CURRENT_LIMIT = 30;
+  
   public static class DriveTrainConstants {
     //robot half width and half length in inches, determined by the full width/length divided by 2
     public static final double HALF_LENGTH = 23/2.0;
@@ -53,4 +56,17 @@ public final class Constants {
     public static final int STR_AXIS = 0;
     public static final int RCW_AXIS = 2;
   }
+
+  public static final class IntakeConstants {
+
+    public static final int INTAKE_MOTOR_ID = 5;
+    public static final double INTAKE_SLEW_RATE = 10;
+    public static final double CONE_IN_SPEED = -1.0;
+    public static final double CONE_OUT_SPEED = 1.0;
+    public static final double CUBE_IN_SPEED = 0.6;
+    public static final double CUBE_OUT_SPEED = -1.0;
+    public static final int CONE_IN_CURRENT = 30;
+    public static final int CUBE_IN_CURRENT = 25;
+    public static final int OUT_CURRENT = 30;
+}
 }
