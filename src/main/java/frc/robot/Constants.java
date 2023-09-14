@@ -6,6 +6,7 @@ package frc.robot;
 
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.util.Units;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -18,6 +19,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 public final class Constants {
 
   public static final int NEO550_CURRENT_LIMIT = 30;
+  public static final int NEO_CURRENT_LIMIT = 60;
   
   public static class DriveTrainConstants {
     //robot half width and half length in inches, determined by the full width/length divided by 2
@@ -69,4 +71,16 @@ public final class Constants {
     public static final int CUBE_IN_CURRENT = 25;
     public static final int OUT_CURRENT = 30;
 }
+
+  public static final class ArmConstants {
+    public static final double RADIANS_PER_REVOLUTION = 0.0837;
+    // initial offset is 0.711 + (0.287) - (0.308)
+    public static final double INITIAL_OFFSET = 0.660;
+
+    //can be 2 degrees off from goal setpoints and still considered at goal; made higher so arm.atGoal() in placeConeOnNode cmd will execute in auton
+    public static final double ANGLE_TOLERANCE_AUTON = Units.degreesToRadians(2);
+    public static final int ARM_MOTOR_ID = 8;
+
+
+  }
 }

@@ -8,14 +8,15 @@ import frc.robot.Constants.JoystickConstants;
 import frc.robot.commands.drivetrain.DriveForwardGivenDistance;
 import frc.robot.commands.drivetrain.StrafeGivenDistance;
 import frc.robot.subsystems.DriveTrain;
+import frc.robot.subsystems.intake.Intake;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.commands.drivetrain.StallIntakeCmd;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -28,6 +29,11 @@ public class RobotContainer {
   private final DriveTrain m_driveTrain = new DriveTrain();
 
   private Joystick joystick = new Joystick(0);
+  public static Intake intake;
+
+  private Command setGroundUpIntakeSetpoint;
+
+  public static CommandSelector angleHeight = CommandSelector.CUBE_INTAKE;
 
 
 
@@ -46,7 +52,6 @@ public class RobotContainer {
       -computeDeadband(joystick.getRawAxis(JoystickConstants.FWD_AXIS), 0.05), 
       computeDeadband(joystick.getRawAxis(JoystickConstants.STR_AXIS), 0.05),  
      computeDeadband(Math.pow(joystick.getRawAxis(JoystickConstants.RCW_AXIS), 3), 0.05)) , m_driveTrain));
-
      
     
     //button that sets all wheels to 0 degrees (homing position)
@@ -63,6 +68,9 @@ public class RobotContainer {
     new JoystickButton(joystick, 8).onTrue( new InstantCommand(() -> DriveTrain.ahrs.reset(), m_driveTrain));
 
     new JoystickButton(joystick, 7).onTrue( new StrafeGivenDistance(-1, m_driveTrain));
+
+    //button for ground setpoint
+    new JoystickButton(joystick, 10).onTrue(setGroundUpIntakeSetpoint);
   }
 
   /**
@@ -84,5 +92,17 @@ public class RobotContainer {
     else {
         return x;
     }
+  }
+
+  private void setUpConeCubeCommands () {
+    setGroundUpIntakeSetpoint = new InstantCommand(() -> {
+      angleHeight = CommandSelector.CUBE_INTAKE;
+  });
+  }
+
+  public enum CommandSelector {
+    CUBE_INTAKE,
+    CUBE_SHOOT,
+    ARM_UP
   }
 }
