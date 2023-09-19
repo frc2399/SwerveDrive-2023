@@ -4,16 +4,25 @@
 
 package frc.robot;
 
+import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.JoystickConstants;
 import frc.robot.commands.drivetrain.DriveForwardGivenDistance;
 import frc.robot.commands.drivetrain.StrafeGivenDistance;
 import frc.robot.subsystems.DriveTrain;
+import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.intake.Intake;
+
+import java.util.Map;
+
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ProfiledPIDSubsystem;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.SelectCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.drivetrain.StallIntakeCmd;
@@ -30,6 +39,7 @@ public class RobotContainer {
 
   private Joystick joystick = new Joystick(0);
   public static Intake intake;
+  public static Arm arm;
 
   private Command setGroundUpIntakeSetpoint;
 
@@ -98,11 +108,27 @@ public class RobotContainer {
     setGroundUpIntakeSetpoint = new InstantCommand(() -> {
       angleHeight = CommandSelector.CUBE_INTAKE;
   });
+
   }
+  public static Command makeSetPositionCommand(ProfiledPIDSubsystem base, double target) {
+    return new SequentialCommandGroup(
+        new ConditionalCommand(new InstantCommand(() -> {}), new InstantCommand(() -> base.enable()), () -> base.isEnabled()),
+        new InstantCommand(() -> base.setGoal(target), base)
+    );
+}
 
   public enum CommandSelector {
     CUBE_INTAKE,
     CUBE_SHOOT,
     ARM_UP
   }
+
+  private Command selectPositionCommand() {
+    return new SelectCommand(
+        Map.ofEntries(
+            Map.entry(CommandSelector.CUBE_INTAKE, makeSetPositionCommand(arm, ArmConstants.CUBE_INTAKE_ANGLE)),
+            Map.entry(CommandSelector.CUBE_SHOOT, makeSetPositionCommand(arm, ArmConstants.CUBE_SHOOT_ANGLE)),
+            Map.entry(CommandSelector.ARM_UP, makeSetPositionCommand(arm, ArmConstants.ARM_UP_ANGLE))),
+        this::select);
+    }
 }

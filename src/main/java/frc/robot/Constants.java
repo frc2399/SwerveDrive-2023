@@ -81,6 +81,10 @@ public final class Constants {
     public static final double ANGLE_TOLERANCE_AUTON = Units.degreesToRadians(2);
     public static final int ARM_MOTOR_ID = 8;
 
+    public static final double CUBE_INTAKE_ANGLE = 0; //TODO: tune
+    public static final double CUBE_SHOOT_ANGLE = 0; //TODO: tune
+    public static final double ARM_UP_ANGLE = 0;
+
 
   }
 }
