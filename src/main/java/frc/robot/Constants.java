@@ -61,9 +61,8 @@ public final class Constants {
 
   public static final class IntakeConstants {
 
-    public static final int INTAKE_MOTOR_ID = 5;
+    public static final int INTAKE_MOTOR_ID = 2;
     public static final double INTAKE_SLEW_RATE = 10;
-    public static final double CONE_IN_SPEED = -1.0;
     public static final double CONE_OUT_SPEED = 1.0;
     public static final double CUBE_IN_SPEED = 0.6;
     public static final double CUBE_OUT_SPEED = -1.0;
@@ -79,7 +78,7 @@ public final class Constants {
 
     //can be 2 degrees off from goal setpoints and still considered at goal; made higher so arm.atGoal() in placeConeOnNode cmd will execute in auton
     public static final double ANGLE_TOLERANCE_AUTON = Units.degreesToRadians(2);
-    public static final int ARM_MOTOR_ID = 8;
+    public static final int ARM_MOTOR_ID = 1;
 
     public static final double CUBE_INTAKE_ANGLE = 0; //TODO: tune
     public static final double CUBE_SHOOT_ANGLE = 0; //TODO: tune

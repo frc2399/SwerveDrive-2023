@@ -14,11 +14,18 @@ import frc.robot.subsystems.intake.Intake;
 
 import java.util.Map;
 
+import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
+import edu.wpi.first.wpilibj.shuffleboard.ComplexWidget;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.ProfiledPIDSubsystem;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SelectCommand;
@@ -41,15 +48,24 @@ public class RobotContainer {
   public static Intake intake;
   public static Arm arm;
 
-  private Command setGroundUpIntakeSetpoint;
+  private Command setGroundIntakeSetpoint;
+  private Command setArmUpIntakeSetpoint;
+  private Command setShootSetpoint;
 
   public static CommandSelector angleHeight = CommandSelector.CUBE_INTAKE;
+
+  //a chooser for the autons
+  final SendableChooser<Command> chooser = new SendableChooser<>();
+  final ComplexWidget autonChooser = Shuffleboard.getTab("Driver")
+  .add("Choose Auton", chooser).withWidget(BuiltInWidgets.kSplitButtonChooser).withPosition(4, 4).withSize(9, 1);
 
 
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Configure the trigger bindings
+    setUpAutonChooser();
+    setUpConeCubeCommands();
     configureBindings();
   }
 
@@ -62,25 +78,51 @@ public class RobotContainer {
       -computeDeadband(joystick.getRawAxis(JoystickConstants.FWD_AXIS), 0.05), 
       computeDeadband(joystick.getRawAxis(JoystickConstants.STR_AXIS), 0.05),  
      computeDeadband(Math.pow(joystick.getRawAxis(JoystickConstants.RCW_AXIS), 3), 0.05)) , m_driveTrain));
+
+     //right d-pad to intake on operator
+    intake.setDefaultCommand(
+      new StallIntakeCmd(intake,
+      //up on joystick dpad to intake
+      () -> joystick.getPOV() == 0,
+      //down on joystick dpad to outtake
+      () -> joystick.getPOV() == 180));
      
     
-    //button that sets all wheels to 0 degrees (homing position)
-    new JoystickButton(joystick, 1).whileTrue(
+    //button that sets all wheels to 0 degrees (homing position) (Button 3)
+    new JoystickButton(joystick, 3).whileTrue(
         new RunCommand(() -> DriveTrain.setWheelAngles(0,0,0,0), m_driveTrain)); 
 
-    //button that sets the wheels into lock position (an X)
-    new JoystickButton(joystick, 9).whileTrue( new RunCommand(() -> DriveTrain.setWheelAngles(
+    //button that sets the wheels into lock position (an X) (Button 4)
+    new JoystickButton(joystick, 4).whileTrue( new RunCommand(() -> DriveTrain.setWheelAngles(
           Units.degreesToRadians(45),
           Units.degreesToRadians(-45),
           Units.degreesToRadians(45),
           Units.degreesToRadians(-45)), m_driveTrain)); 
     
-    new JoystickButton(joystick, 8).onTrue( new InstantCommand(() -> DriveTrain.ahrs.reset(), m_driveTrain));
+    //button that resets gyro (Button 5)
+    new JoystickButton(joystick, 5).onTrue( new InstantCommand(() -> DriveTrain.ahrs.reset(), m_driveTrain));
 
-    new JoystickButton(joystick, 7).onTrue( new StrafeGivenDistance(-1, m_driveTrain));
+    //new JoystickButton(joystick, 7).onTrue( new StrafeGivenDistance(-1, m_driveTrain));
 
-    //button for ground setpoint
-    new JoystickButton(joystick, 10).onTrue(setGroundUpIntakeSetpoint);
+    //button for ground setpoint (Button 7)
+    new JoystickButton(joystick, 7).onTrue(setGroundIntakeSetpoint);
+
+    //button for arm up/turtle mode (Button 9)
+    new JoystickButton(joystick, 9).onTrue(setArmUpIntakeSetpoint);
+
+    //button for shoot (Button 11)
+    new JoystickButton(joystick, 11).onTrue(setShootSetpoint);
+
+    //button to send arm to selected position (Button 1)
+    new JoystickButton(joystick, 1).onTrue(selectPositionCommand());
+
+    //button to reset arm (Button 6)
+    new JoystickButton(joystick, 6).onTrue(resetArmEncoderCommand(arm)); 
+
+    //manually control the arm
+    new Trigger(() -> joystick.getPOV() == 90).whileTrue(makeSetSpeedGravityCompensationCommand(arm, 0.2)).onFalse(makeSetSpeedGravityCompensationCommand(arm, 0)); 
+    new Trigger(() -> joystick.getPOV() == 270).whileTrue(makeSetSpeedGravityCompensationCommand(arm, -0.2)).onFalse(makeSetPositionCommand(arm, 0)); 
+
   }
 
   /**
@@ -89,8 +131,10 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    // An example command will be run in autonomous
-    return null;
+    // The selected command will be run in autonomous
+    String autonCommand = chooser.getSelected().toString();
+    DataLogManager.log("Auton: " + autonCommand);
+    return chooser.getSelected();
   }
 
 
@@ -105,11 +149,25 @@ public class RobotContainer {
   }
 
   private void setUpConeCubeCommands () {
-    setGroundUpIntakeSetpoint = new InstantCommand(() -> {
+    setGroundIntakeSetpoint = new InstantCommand(() -> {
       angleHeight = CommandSelector.CUBE_INTAKE;
   });
 
+    setArmUpIntakeSetpoint = new InstantCommand(() -> {
+      angleHeight = CommandSelector.ARM_UP; 
+    });
+
+    setShootSetpoint = new InstantCommand(() -> {
+      angleHeight = CommandSelector.CUBE_SHOOT;
+    });
+
   }
+
+
+  private void setUpAutonChooser () {
+    chooser.setDefaultOption("do nothing", new PrintCommand("i am doing nothing"));
+}
+
   public static Command makeSetPositionCommand(ProfiledPIDSubsystem base, double target) {
     return new SequentialCommandGroup(
         new ConditionalCommand(new InstantCommand(() -> {}), new InstantCommand(() -> base.enable()), () -> base.isEnabled()),
@@ -117,11 +175,34 @@ public class RobotContainer {
     );
 }
 
+  private Command makeSetSpeedGravityCompensationCommand(Arm a, double speed) {
+    return new SequentialCommandGroup(
+        new InstantCommand(() -> a.disable()),
+        new RunCommand(() -> a.setSpeedGravityCompensation(speed), a)
+    );
+  }
+
+  private static Command resetArmEncoderCommand(Arm a) {
+    Debouncer debouncer = new Debouncer(0.2);
+    return new SequentialCommandGroup(
+        new InstantCommand(() ->  a.disable()),
+        new RunCommand(() -> a.setSpeed(0.15)).withTimeout(0.2),
+        new RunCommand(() -> a.setSpeed(0.15)).until(() -> debouncer.calculate(Math.abs(a.getEncoderSpeed()) < 0.01)),
+        new InstantCommand(() -> a.setPosition(Constants.ArmConstants.INITIAL_OFFSET)),
+        makeSetPositionCommand(a, ArmConstants.ARM_UP_ANGLE)
+    );
+  }
+
   public enum CommandSelector {
     CUBE_INTAKE,
     CUBE_SHOOT,
     ARM_UP
   }
+
+
+  private CommandSelector select() {
+    return angleHeight;
+}
 
   private Command selectPositionCommand() {
     return new SelectCommand(
