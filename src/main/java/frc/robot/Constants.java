@@ -53,10 +53,10 @@ public final class Constants {
 
   }
 
-  public static class JoystickConstants {
+  public static class XboxConstants {
     public static final int FWD_AXIS = 1;
     public static final int STR_AXIS = 0;
-    public static final int RCW_AXIS = 2;
+    public static final int RCW_AXIS = 4;
   }
 
   public static final class IntakeConstants {

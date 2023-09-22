@@ -5,12 +5,16 @@
 package frc.robot;
 
 import frc.robot.Constants.ArmConstants;
-import frc.robot.Constants.JoystickConstants;
+import frc.robot.Constants.XboxConstants;
 import frc.robot.commands.drivetrain.DriveForwardGivenDistance;
 import frc.robot.commands.drivetrain.StrafeGivenDistance;
 import frc.robot.subsystems.DriveTrain;
 import frc.robot.subsystems.arm.Arm;
+import frc.robot.subsystems.arm.ArmIO;
+import frc.robot.subsystems.arm.RealArm;
 import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.intake.IntakeIO;
+import frc.robot.subsystems.intake.RealIntake;
 
 import java.util.Map;
 
@@ -18,6 +22,8 @@ import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.PS4Controller.Button;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.ComplexWidget;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -44,7 +50,7 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final DriveTrain m_driveTrain = new DriveTrain();
 
-  private Joystick joystick = new Joystick(0);
+  private XboxController xbox = new XboxController(0);
   public static Intake intake;
   public static Arm arm;
 
@@ -64,6 +70,7 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Configure the trigger bindings
+    setUpSubsystems();
     setUpAutonChooser();
     setUpConeCubeCommands();
     configureBindings();
@@ -75,53 +82,54 @@ public class RobotContainer {
     //TODO: refine the cubing and deadband
     //test deadband
    m_driveTrain.setDefaultCommand(new RunCommand(() -> m_driveTrain.setSpeed(
-      -computeDeadband(joystick.getRawAxis(JoystickConstants.FWD_AXIS), 0.05), 
-      computeDeadband(joystick.getRawAxis(JoystickConstants.STR_AXIS), 0.05),  
-     computeDeadband(Math.pow(joystick.getRawAxis(JoystickConstants.RCW_AXIS), 3), 0.05)) , m_driveTrain));
+      -computeDeadband(xbox.getRawAxis(XboxConstants.FWD_AXIS), 0.05), 
+      computeDeadband(xbox.getRawAxis(XboxConstants.STR_AXIS), 0.05),  
+     computeDeadband(Math.pow(xbox.getRawAxis(XboxConstants.RCW_AXIS), 3), 0.05)) , m_driveTrain));
 
      //right d-pad to intake on operator
     intake.setDefaultCommand(
       new StallIntakeCmd(intake,
-      //up on joystick dpad to intake
-      () -> joystick.getPOV() == 0,
-      //down on joystick dpad to outtake
-      () -> joystick.getPOV() == 180));
+      //right trigger to intake
+      () -> (xbox.getRawAxis(XboxController.Axis.kRightTrigger.value) > 0.1),
+      //left trigger to outtake
+      () -> (xbox.getRawAxis(XboxController.Axis.kLeftTrigger.value) > 0.1)));
      
     
-    //button that sets all wheels to 0 degrees (homing position) (Button 3)
-    new JoystickButton(joystick, 3).whileTrue(
+    //Y BUTTON (9): set all wheels to 0
+    new JoystickButton(xbox, 9).whileTrue(
         new RunCommand(() -> DriveTrain.setWheelAngles(0,0,0,0), m_driveTrain)); 
 
-    //button that sets the wheels into lock position (an X) (Button 4)
-    new JoystickButton(joystick, 4).whileTrue( new RunCommand(() -> DriveTrain.setWheelAngles(
+    //X BUTTON (8): lock wheels into X
+    new JoystickButton(xbox, 8).whileTrue( new RunCommand(() -> DriveTrain.setWheelAngles(
           Units.degreesToRadians(45),
           Units.degreesToRadians(-45),
           Units.degreesToRadians(45),
           Units.degreesToRadians(-45)), m_driveTrain)); 
     
-    //button that resets gyro (Button 5)
-    new JoystickButton(joystick, 5).onTrue( new InstantCommand(() -> DriveTrain.ahrs.reset(), m_driveTrain));
+    //A BUTTON (6): resets gyro
+    new JoystickButton(xbox, 6).onTrue( new InstantCommand(() -> DriveTrain.ahrs.reset(), m_driveTrain));
 
     //new JoystickButton(joystick, 7).onTrue( new StrafeGivenDistance(-1, m_driveTrain));
 
+    //TODO: shift rest of buttons to Xbox controller
     //button for ground setpoint (Button 7)
-    new JoystickButton(joystick, 7).onTrue(setGroundIntakeSetpoint);
+    new JoystickButton(xbox, 7).onTrue(setGroundIntakeSetpoint);
 
     //button for arm up/turtle mode (Button 9)
-    new JoystickButton(joystick, 9).onTrue(setArmUpIntakeSetpoint);
+    new JoystickButton(xbox, 9).onTrue(setArmUpIntakeSetpoint);
 
     //button for shoot (Button 11)
-    new JoystickButton(joystick, 11).onTrue(setShootSetpoint);
+    new JoystickButton(xbox, 11).onTrue(setShootSetpoint);
 
     //button to send arm to selected position (Button 1)
-    new JoystickButton(joystick, 1).onTrue(selectPositionCommand());
+    new JoystickButton(xbox, 1).onTrue(selectPositionCommand());
 
     //button to reset arm (Button 6)
-    new JoystickButton(joystick, 6).onTrue(resetArmEncoderCommand(arm)); 
+    new JoystickButton(xbox, 6).onTrue(resetArmEncoderCommand(arm)); 
 
     //manually control the arm
-    new Trigger(() -> joystick.getPOV() == 90).whileTrue(makeSetSpeedGravityCompensationCommand(arm, 0.2)).onFalse(makeSetSpeedGravityCompensationCommand(arm, 0)); 
-    new Trigger(() -> joystick.getPOV() == 270).whileTrue(makeSetSpeedGravityCompensationCommand(arm, -0.2)).onFalse(makeSetPositionCommand(arm, 0)); 
+    new Trigger(() -> xbox.getPOV() == 90).whileTrue(makeSetSpeedGravityCompensationCommand(arm, 0.5)).onFalse(makeSetSpeedGravityCompensationCommand(arm, 0)); 
+    new Trigger(() -> xbox.getPOV() == 270).whileTrue(makeSetSpeedGravityCompensationCommand(arm, -0.5)).onFalse(makeSetPositionCommand(arm, 0)); 
 
   }
 
@@ -163,6 +171,24 @@ public class RobotContainer {
 
   }
 
+  private void setUpSubsystems () {
+
+  
+    ArmIO armIO;
+    IntakeIO intakeIO;
+   
+        
+        armIO = new RealArm();
+        intakeIO = new RealIntake();
+    
+
+
+    arm = new Arm(armIO);
+    intake = new Intake(intakeIO);
+    //limelight = new SimLimelight(driveTrain);
+    // camera = new Camera(photonCamera);
+
+}
 
   private void setUpAutonChooser () {
     chooser.setDefaultOption("do nothing", new PrintCommand("i am doing nothing"));

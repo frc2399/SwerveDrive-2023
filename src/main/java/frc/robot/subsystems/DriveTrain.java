@@ -303,7 +303,6 @@ public class DriveTrain extends SubsystemBase {
     SmartDashboard.putNumber("Speed 1", flippedSpeed1/speedProportion);
   
     // set all wheel speeds
-    // TODO: limit speed in case speed goes over 1
     if (flippedSpeed1 != 0) {
       drive1.set(flippedSpeed1/speedProportion * 0.5);
       steer1.getPIDController().setReference(convertToSparkMaxAngle(flippedAngle1), ControlType.kPosition);
