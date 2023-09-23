@@ -23,7 +23,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.PS4Controller.Button;
+import edu.wpi.first.wpilibj.XboxController.Button;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.ComplexWidget;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -72,21 +72,20 @@ public class RobotContainer {
     // Configure the trigger bindings
     setUpSubsystems();
     setUpAutonChooser();
-    setUpConeCubeCommands();
+    setUpCubeCommands();
     configureBindings();
   }
 
  
   private void configureBindings() {
     
-    //TODO: refine the cubing and deadband
-    //test deadband
-   m_driveTrain.setDefaultCommand(new RunCommand(() -> m_driveTrain.setSpeed(
-      -computeDeadband(xbox.getRawAxis(XboxConstants.FWD_AXIS), 0.05), 
-      computeDeadband(xbox.getRawAxis(XboxConstants.STR_AXIS), 0.05),  
-     computeDeadband(Math.pow(xbox.getRawAxis(XboxConstants.RCW_AXIS), 3), 0.05)) , m_driveTrain));
+    m_driveTrain.setDefaultCommand(new RunCommand(() -> m_driveTrain.setSpeed(
+      -computeDeadband(xbox.getRawAxis(XboxController.Axis.kLeftY.value), 0.05),
+      computeDeadband(xbox.getRawAxis(XboxController.Axis.kLeftX.value), 0.05),
+      computeDeadband(Math.pow(xbox.getRawAxis(XboxController.Axis.kRightY.value), 3), 0.05)),
+      m_driveTrain));      
 
-     //right d-pad to intake on operator
+     //right trigger to intake and left trigger to outtake on driver
     intake.setDefaultCommand(
       new StallIntakeCmd(intake,
       //right trigger to intake
@@ -94,38 +93,42 @@ public class RobotContainer {
       //left trigger to outtake
       () -> (xbox.getRawAxis(XboxController.Axis.kLeftTrigger.value) > 0.1)));
      
-    
-    //Y BUTTON (9): set all wheels to 0
-    new JoystickButton(xbox, 9).whileTrue(
-        new RunCommand(() -> DriveTrain.setWheelAngles(0,0,0,0), m_driveTrain)); 
+    //Driver Button Y (4) - sets all wheels to 0 degrees (homing position)
+  new JoystickButton(xbox, Button.kY.value).whileTrue(
+  new RunCommand(() -> DriveTrain.setWheelAngles(0,0,0,0), m_driveTrain));
 
-    //X BUTTON (8): lock wheels into X
-    new JoystickButton(xbox, 8).whileTrue( new RunCommand(() -> DriveTrain.setWheelAngles(
-          Units.degreesToRadians(45),
-          Units.degreesToRadians(-45),
-          Units.degreesToRadians(45),
-          Units.degreesToRadians(-45)), m_driveTrain)); 
+    //Driver Button X (3) - button that sets the wheels into lock position (an X)
+  new JoystickButton(xbox, Button.kX.value).whileTrue( new RunCommand(() -> DriveTrain.setWheelAngles(
+  Units.degreesToRadians(45),
+  Units.degreesToRadians(-45),
+  Units.degreesToRadians(45),
+  Units.degreesToRadians(-45)), m_driveTrain));
+  
     
-    //A BUTTON (6): resets gyro
-    new JoystickButton(xbox, 6).onTrue( new InstantCommand(() -> DriveTrain.ahrs.reset(), m_driveTrain));
+    //B BUTTON (2): resets gyro
+    new JoystickButton(xbox, Button.kB.value).onTrue( new InstantCommand(() -> DriveTrain.ahrs.reset(), m_driveTrain));
 
     //new JoystickButton(joystick, 7).onTrue( new StrafeGivenDistance(-1, m_driveTrain));
 
     //TODO: shift rest of buttons to Xbox controller
-    //button for ground setpoint (Button 7)
-    new JoystickButton(xbox, 7).onTrue(setGroundIntakeSetpoint);
+    //button for ground setpoint (Button 6)
+    new JoystickButton(xbox, Button.kRightBumper.value).onTrue(setGroundIntakeSetpoint);
 
     //button for arm up/turtle mode (Button 9)
-    new JoystickButton(xbox, 9).onTrue(setArmUpIntakeSetpoint);
+    new Trigger(() -> xbox.getRightBumperPressed() && 
+                      xbox.getLeftBumperPressed()
+              ).onTrue(setArmUpIntakeSetpoint);
 
-    //button for shoot (Button 11)
-    new JoystickButton(xbox, 11).onTrue(setShootSetpoint);
+
+
+    //button for shoot (Button 5)
+    new JoystickButton(xbox, Button.kLeftBumper.value).onTrue(setShootSetpoint);
 
     //button to send arm to selected position (Button 1)
     new JoystickButton(xbox, 1).onTrue(selectPositionCommand());
 
-    //button to reset arm (Button 6)
-    new JoystickButton(xbox, 6).onTrue(resetArmEncoderCommand(arm)); 
+    //A Button (1) - button to reset arm
+    new JoystickButton(xbox, Button.kA.value).onTrue(resetArmEncoderCommand(arm)); 
 
     //manually control the arm
     new Trigger(() -> xbox.getPOV() == 90).whileTrue(makeSetSpeedGravityCompensationCommand(arm, 0.5)).onFalse(makeSetSpeedGravityCompensationCommand(arm, 0)); 
@@ -156,20 +159,29 @@ public class RobotContainer {
     }
   }
 
-  private void setUpConeCubeCommands () {
-    setGroundIntakeSetpoint = new InstantCommand(() -> {
-      angleHeight = CommandSelector.CUBE_INTAKE;
-  });
+  private void setUpCubeCommands () {
+    setGroundIntakeSetpoint = new SequentialCommandGroup(
+      new InstantCommand(() -> {
+        angleHeight = CommandSelector.CUBE_INTAKE;
+      }),
+      selectPositionCommand()
+    );
 
-    setArmUpIntakeSetpoint = new InstantCommand(() -> {
-      angleHeight = CommandSelector.ARM_UP; 
-    });
+    setArmUpIntakeSetpoint = new SequentialCommandGroup(
+      new InstantCommand(() -> {
+        angleHeight = CommandSelector.ARM_UP;
+      }),
+      selectPositionCommand()
+    );
 
-    setShootSetpoint = new InstantCommand(() -> {
-      angleHeight = CommandSelector.CUBE_SHOOT;
-    });
+    setShootSetpoint = new SequentialCommandGroup(
+      new InstantCommand(() -> {
+        angleHeight = CommandSelector.CUBE_SHOOT;
+      }),
+      selectPositionCommand()
+    );
+ }
 
-  }
 
   private void setUpSubsystems () {
 
