@@ -28,7 +28,7 @@ public class Arm extends ProfiledPIDSubsystem {
   private static final double max_vel = 1.5;  // rad/s
   private static final double max_accel = 2.7;  // rad/s/s
   private static final Constraints constraints = new Constraints(max_vel, max_accel);
-  private static double gravityCompensation = 0.04;
+  private static double gravityCompensation = 0.02;
 
   public Arm(ArmIO io) {
     super(new ProfiledPIDController(kpPos, 0, 0, constraints));
@@ -71,7 +71,9 @@ public class Arm extends ProfiledPIDSubsystem {
 
   public void setSpeedGravityCompensation(double speed) {
     // calls set speed function in the file that does armIO.setSpeed after capping speed
-    setSpeed(speed + gravityCompensation * Math.cos(getEncoderPosition()));
+    // DO NOT DELETE THE RANDOM 2; that's to account for the offset
+    // TODO make it so there isn't a random 2?
+    setSpeed(speed + gravityCompensation * Math.cos(getEncoderPosition() + 2));
   }
 
   public double getArmCurrent() {

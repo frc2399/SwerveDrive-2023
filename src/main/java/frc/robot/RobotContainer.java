@@ -80,9 +80,9 @@ public class RobotContainer {
   private void configureBindings() {
     
     m_driveTrain.setDefaultCommand(new RunCommand(() -> m_driveTrain.setSpeed(
-      -computeDeadband(xbox.getRawAxis(XboxController.Axis.kLeftY.value), 0.05),
-      computeDeadband(xbox.getRawAxis(XboxController.Axis.kLeftX.value), 0.05),
-      computeDeadband(Math.pow(xbox.getRawAxis(XboxController.Axis.kRightY.value), 3), 0.05)),
+      -computeDeadband(xbox.getRawAxis(XboxController.Axis.kLeftY.value), 0.07),
+      computeDeadband(xbox.getRawAxis(XboxController.Axis.kLeftX.value), 0.07),
+      computeDeadband(Math.pow(xbox.getRawAxis(XboxController.Axis.kRightX.value), 3), 0.05)),
       m_driveTrain));      
 
      //right trigger to intake and left trigger to outtake on driver
@@ -112,17 +112,24 @@ public class RobotContainer {
 
     //TODO: shift rest of buttons to Xbox controller
     //button for ground setpoint (Button 6)
-    new JoystickButton(xbox, Button.kRightBumper.value).onTrue(setGroundIntakeSetpoint);
-
-    //button for arm up/turtle mode (Button 9)
+    //new JoystickButton(xbox, Button.kRightBumper.value).onTrue(setGroundIntakeSetpoint);
     new Trigger(() -> xbox.getRightBumperPressed() && 
-                      xbox.getLeftBumperPressed()
-              ).onTrue(setArmUpIntakeSetpoint);
-
-
-
+                        !xbox.getLeftBumperPressed()
+              ).onTrue(setGroundIntakeSetpoint);
     //button for shoot (Button 5)
-    new JoystickButton(xbox, Button.kLeftBumper.value).onTrue(setShootSetpoint);
+    //new JoystickButton(xbox, Button.kLeftBumper.value).onTrue(setShootSetpoint);
+    new Trigger(() -> !xbox.getRightBumperPressed() && 
+                        xbox.getLeftBumperPressed()
+              ).onTrue(setShootSetpoint);
+    //button for arm up/turtle mode (Button 9)
+    new JoystickButton(xbox, Button.kRightStick.value).onTrue(setArmUpIntakeSetpoint);
+    // new Trigger(() -> xbox.getRightBumperPressed() && 
+    //                   xbox.getLeftBumperPressed()
+    //           ).whileTrue(setArmUpIntakeSetpoint);
+
+
+
+
 
     //button to send arm to selected position (Button 1)
     new JoystickButton(xbox, 1).onTrue(selectPositionCommand());
@@ -131,8 +138,8 @@ public class RobotContainer {
     new JoystickButton(xbox, Button.kA.value).onTrue(resetArmEncoderCommand(arm)); 
 
     //manually control the arm
-    new Trigger(() -> xbox.getPOV() == 90).whileTrue(makeSetSpeedGravityCompensationCommand(arm, 0.5)).onFalse(makeSetSpeedGravityCompensationCommand(arm, 0)); 
-    new Trigger(() -> xbox.getPOV() == 270).whileTrue(makeSetSpeedGravityCompensationCommand(arm, -0.5)).onFalse(makeSetPositionCommand(arm, 0)); 
+    new Trigger(() -> xbox.getPOV() == 90).whileTrue(makeSetSpeedGravityCompensationCommand(arm, 0.3)).onFalse(makeSetSpeedGravityCompensationCommand(arm, 0)); 
+    new Trigger(() -> xbox.getPOV() == 270).whileTrue(makeSetSpeedGravityCompensationCommand(arm, -0.3)).onFalse(makeSetSpeedGravityCompensationCommand(arm, 0)); 
 
   }
 
