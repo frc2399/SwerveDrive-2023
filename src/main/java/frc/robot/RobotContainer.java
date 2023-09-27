@@ -5,9 +5,6 @@
 package frc.robot;
 
 import frc.robot.Constants.ArmConstants;
-import frc.robot.Constants.XboxConstants;
-import frc.robot.commands.drivetrain.DriveForwardGivenDistance;
-import frc.robot.commands.drivetrain.StrafeGivenDistance;
 import frc.robot.subsystems.DriveTrain;
 import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.arm.ArmIO;
@@ -21,7 +18,6 @@ import java.util.Map;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DataLogManager;
-import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.XboxController.Button;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
@@ -41,9 +37,12 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.drivetrain.StallIntakeCmd;
 
 /**
- * This class is where the bulk of the robot should be declared. Since Command-based is a
- * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
- * periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
+ * This class is where the bulk of the robot should be declared. Since
+ * Command-based is a
+ * "declarative" paradigm, very little robot logic should actually be handled in
+ * the {@link Robot}
+ * periodic methods (other than the scheduler calls). Instead, the structure of
+ * the robot (including
  * subsystems, commands, and trigger mappings) should be declared here.
  */
 public class RobotContainer {
@@ -56,18 +55,18 @@ public class RobotContainer {
 
   private Command setGroundIntakeSetpoint;
   private Command setArmUpIntakeSetpoint;
-  private Command setShootSetpoint;
+  private Command setShootIntakeSetpoint;
 
-  public static CommandSelector angleHeight = CommandSelector.CUBE_INTAKE;
+  public static CommandSelector setpoint = CommandSelector.CUBE_INTAKE;
 
-  //a chooser for the autons
+  // a chooser for the autons
   final SendableChooser<Command> chooser = new SendableChooser<>();
   final ComplexWidget autonChooser = Shuffleboard.getTab("Driver")
-  .add("Choose Auton", chooser).withWidget(BuiltInWidgets.kSplitButtonChooser).withPosition(4, 4).withSize(9, 1);
+      .add("Choose Auton", chooser).withWidget(BuiltInWidgets.kSplitButtonChooser).withPosition(4, 4).withSize(9, 1);
 
-
-
-  /** The container for the robot. Contains subsystems, OI devices, and commands. */
+  /**
+   * The container for the robot. Contains subsystems, OI devices, and commands.
+   */
   public RobotContainer() {
     // Configure the trigger bindings
     setUpSubsystems();
@@ -76,70 +75,53 @@ public class RobotContainer {
     configureBindings();
   }
 
- 
   private void configureBindings() {
-    
+
     m_driveTrain.setDefaultCommand(new RunCommand(() -> m_driveTrain.setSpeed(
-      -computeDeadband(xbox.getRawAxis(XboxController.Axis.kLeftY.value), 0.07),
-      computeDeadband(xbox.getRawAxis(XboxController.Axis.kLeftX.value), 0.07),
-      computeDeadband(Math.pow(xbox.getRawAxis(XboxController.Axis.kRightX.value), 3), 0.05)),
-      m_driveTrain));      
+        -computeDeadband(xbox.getRawAxis(XboxController.Axis.kLeftY.value), 0.07),
+        computeDeadband(xbox.getRawAxis(XboxController.Axis.kLeftX.value), 0.07),
+        computeDeadband(Math.pow(xbox.getRawAxis(XboxController.Axis.kRightX.value), 3), 0.05)),
+        m_driveTrain));
 
-     //right trigger to intake and left trigger to outtake on driver
+    // right trigger to intake and left trigger to outtake on driver
     intake.setDefaultCommand(
-      new StallIntakeCmd(intake,
-      //right trigger to intake
-      () -> (xbox.getRawAxis(XboxController.Axis.kRightTrigger.value) > 0.1),
-      //left trigger to outtake
-      () -> (xbox.getRawAxis(XboxController.Axis.kLeftTrigger.value) > 0.1)));
-     
-    //Driver Button Y (4) - sets all wheels to 0 degrees (homing position)
-  new JoystickButton(xbox, Button.kY.value).whileTrue(
-  new RunCommand(() -> DriveTrain.setWheelAngles(0,0,0,0), m_driveTrain));
+        new StallIntakeCmd(intake,
+            // right trigger to intake
+            () -> (xbox.getRawAxis(XboxController.Axis.kRightTrigger.value) > 0.1),
+            // left trigger to outtake
+            () -> (xbox.getRawAxis(XboxController.Axis.kLeftTrigger.value) > 0.1)));
 
-    //Driver Button X (3) - button that sets the wheels into lock position (an X)
-  new JoystickButton(xbox, Button.kX.value).whileTrue( new RunCommand(() -> DriveTrain.setWheelAngles(
-  Units.degreesToRadians(45),
-  Units.degreesToRadians(-45),
-  Units.degreesToRadians(45),
-  Units.degreesToRadians(-45)), m_driveTrain));
-  
-    
-    //B BUTTON (2): resets gyro
-    new JoystickButton(xbox, Button.kB.value).onTrue( new InstantCommand(() -> DriveTrain.ahrs.reset(), m_driveTrain));
+    // Driver Button Y (4) - sets all wheels to 0 degrees (homing position)
+    new JoystickButton(xbox, Button.kY.value).whileTrue(
+        new RunCommand(() -> DriveTrain.setWheelAngles(0, 0, 0, 0), m_driveTrain));
 
-    //new JoystickButton(joystick, 7).onTrue( new StrafeGivenDistance(-1, m_driveTrain));
+    // Driver Button X (3) - button that sets the wheels into lock position (an X)
+    new JoystickButton(xbox, Button.kX.value).whileTrue(new RunCommand(() -> DriveTrain.setWheelAngles(
+        Units.degreesToRadians(45),
+        Units.degreesToRadians(-45),
+        Units.degreesToRadians(45),
+        Units.degreesToRadians(-45)), m_driveTrain));
 
-    //TODO: shift rest of buttons to Xbox controller
-    //button for ground setpoint (Button 6)
-    //new JoystickButton(xbox, Button.kRightBumper.value).onTrue(setGroundIntakeSetpoint);
-    new Trigger(() -> xbox.getRightBumperPressed() && 
-                        !xbox.getLeftBumperPressed()
-              ).onTrue(setGroundIntakeSetpoint);
-    //button for shoot (Button 5)
-    //new JoystickButton(xbox, Button.kLeftBumper.value).onTrue(setShootSetpoint);
-    new Trigger(() -> !xbox.getRightBumperPressed() && 
-                        xbox.getLeftBumperPressed()
-              ).onTrue(setShootSetpoint);
-    //button for arm up/turtle mode (Button 9)
+    // B BUTTON (2): resets gyro
+    new JoystickButton(xbox, Button.kB.value).onTrue(new InstantCommand(() -> DriveTrain.ahrs.reset(), m_driveTrain));
+
+    // button for ground setpoint (Button 6/right bumper)
+    new Trigger(() -> xbox.getRightBumperPressed() &&
+        !xbox.getLeftBumperPressed()).onTrue(setGroundIntakeSetpoint);
+    // button for shoot (Button 5/left bumper)
+    new Trigger(() -> !xbox.getRightBumperPressed() &&
+        xbox.getLeftBumperPressed()).onTrue(setShootIntakeSetpoint);
+    // button for arm up/turtle mode (click right stick/Button 15)
     new JoystickButton(xbox, Button.kRightStick.value).onTrue(setArmUpIntakeSetpoint);
-    // new Trigger(() -> xbox.getRightBumperPressed() && 
-    //                   xbox.getLeftBumperPressed()
-    //           ).whileTrue(setArmUpIntakeSetpoint);
 
+    // A Button (1) - button to reset arm
+    new JoystickButton(xbox, Button.kA.value).onTrue(resetArmEncoderCommand(arm));
 
-
-
-
-    //button to send arm to selected position (Button 1)
-    new JoystickButton(xbox, 1).onTrue(selectPositionCommand());
-
-    //A Button (1) - button to reset arm
-    new JoystickButton(xbox, Button.kA.value).onTrue(resetArmEncoderCommand(arm)); 
-
-    //manually control the arm
-    new Trigger(() -> xbox.getPOV() == 90).whileTrue(makeSetSpeedGravityCompensationCommand(arm, 0.3)).onFalse(makeSetSpeedGravityCompensationCommand(arm, 0)); 
-    new Trigger(() -> xbox.getPOV() == 270).whileTrue(makeSetSpeedGravityCompensationCommand(arm, -0.3)).onFalse(makeSetSpeedGravityCompensationCommand(arm, 0)); 
+    // manually control the arm (dpad left and right)
+    new Trigger(() -> xbox.getPOV() == 90).whileTrue(makeSetSpeedGravityCompensationCommand(arm, 0.3))
+        .onFalse(makeSetSpeedGravityCompensationCommand(arm, 0));
+    new Trigger(() -> xbox.getPOV() == 270).whileTrue(makeSetSpeedGravityCompensationCommand(arm, -0.3))
+        .onFalse(makeSetSpeedGravityCompensationCommand(arm, 0));
 
   }
 
@@ -155,87 +137,73 @@ public class RobotContainer {
     return chooser.getSelected();
   }
 
-
-  //computing deadband
+  // computing deadband
   public static double computeDeadband(double x, double deadband) {
-    if (Math.abs(x) <= deadband) { 
-        return 0; 
-    }
-    else {
-        return x;
+    if (Math.abs(x) <= deadband) {
+      return 0;
+    } else {
+      return x;
     }
   }
 
-  private void setUpCubeCommands () {
+  private void setUpCubeCommands() {
     setGroundIntakeSetpoint = new SequentialCommandGroup(
-      new InstantCommand(() -> {
-        angleHeight = CommandSelector.CUBE_INTAKE;
-      }),
-      selectPositionCommand()
-    );
+        new InstantCommand(() -> {
+          setpoint = CommandSelector.CUBE_INTAKE;
+        }),
+        selectPositionCommand());
 
     setArmUpIntakeSetpoint = new SequentialCommandGroup(
-      new InstantCommand(() -> {
-        angleHeight = CommandSelector.ARM_UP;
-      }),
-      selectPositionCommand()
-    );
+        new InstantCommand(() -> {
+          setpoint = CommandSelector.ARM_UP;
+        }),
+        selectPositionCommand());
 
-    setShootSetpoint = new SequentialCommandGroup(
-      new InstantCommand(() -> {
-        angleHeight = CommandSelector.CUBE_SHOOT;
-      }),
-      selectPositionCommand()
-    );
- }
+    setShootIntakeSetpoint = new SequentialCommandGroup(
+        new InstantCommand(() -> {
+          setpoint = CommandSelector.CUBE_SHOOT;
+        }),
+        selectPositionCommand());
+  }
 
+  private void setUpSubsystems() {
 
-  private void setUpSubsystems () {
-
-  
     ArmIO armIO;
     IntakeIO intakeIO;
-   
-        
-        armIO = new RealArm();
-        intakeIO = new RealIntake();
-    
 
+    armIO = new RealArm();
+    intakeIO = new RealIntake();
 
     arm = new Arm(armIO);
     intake = new Intake(intakeIO);
-    //limelight = new SimLimelight(driveTrain);
-    // camera = new Camera(photonCamera);
 
-}
+  }
 
-  private void setUpAutonChooser () {
+  private void setUpAutonChooser() {
     chooser.setDefaultOption("do nothing", new PrintCommand("i am doing nothing"));
-}
+  }
 
   public static Command makeSetPositionCommand(ProfiledPIDSubsystem base, double target) {
     return new SequentialCommandGroup(
-        new ConditionalCommand(new InstantCommand(() -> {}), new InstantCommand(() -> base.enable()), () -> base.isEnabled()),
-        new InstantCommand(() -> base.setGoal(target), base)
-    );
-}
+        new ConditionalCommand(new InstantCommand(() -> {
+        }), new InstantCommand(() -> base.enable()), () -> base.isEnabled()),
+        new InstantCommand(() -> base.setGoal(target), base));
+  }
 
   private Command makeSetSpeedGravityCompensationCommand(Arm a, double speed) {
     return new SequentialCommandGroup(
         new InstantCommand(() -> a.disable()),
-        new RunCommand(() -> a.setSpeedGravityCompensation(speed), a)
-    );
+        new RunCommand(() -> a.setSpeedGravityCompensation(speed), a));
   }
 
   private static Command resetArmEncoderCommand(Arm a) {
     Debouncer debouncer = new Debouncer(0.2);
     return new SequentialCommandGroup(
-        new InstantCommand(() ->  a.disable()),
+        new InstantCommand(() -> a.disable()),
         new RunCommand(() -> a.setSpeed(0.15)).withTimeout(0.2),
         new RunCommand(() -> a.setSpeed(0.15)).until(() -> debouncer.calculate(Math.abs(a.getEncoderSpeed()) < 0.01)),
         new InstantCommand(() -> a.setPosition(Constants.ArmConstants.INITIAL_OFFSET)),
-        makeSetPositionCommand(a, ArmConstants.ARM_UP_ANGLE)
-    );
+        makeSetPositionCommand(a, ArmConstants.ARM_UP_ANGLE));
   }
 
   public enum CommandSelector {
@@ -244,10 +212,9 @@ public class RobotContainer {
     ARM_UP
   }
 
-
   private CommandSelector select() {
-    return angleHeight;
-}
+    return setpoint;
+  }
 
   private Command selectPositionCommand() {
     return new SelectCommand(
@@ -256,5 +223,5 @@ public class RobotContainer {
             Map.entry(CommandSelector.CUBE_SHOOT, makeSetPositionCommand(arm, ArmConstants.CUBE_SHOOT_ANGLE)),
             Map.entry(CommandSelector.ARM_UP, makeSetPositionCommand(arm, ArmConstants.ARM_UP_ANGLE))),
         this::select);
-    }
+  }
 }

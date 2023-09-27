@@ -7,26 +7,24 @@ package frc.robot.subsystems.arm;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.ProfiledPIDSubsystem;
-import frc.robot.RobotContainer;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.util.PIDUtil;
 
 public class Arm extends ProfiledPIDSubsystem {
   /** Creates a new Arm. */
   private ArmIO armIO;
-  private double targetAngle = - Math.PI/2; 
-  //private static final double feedForward = 0.133;
+  private double targetAngle = -Math.PI / 2;
+  // private static final double feedForward = 0.133;
   private static final double feedForward = 0.14285;
 
   private static final double kpPos = 0.8;
 
   // Trapezoidal profile constants and variables
-  private static final double max_vel = 1.5;  // rad/s
-  private static final double max_accel = 2.7;  // rad/s/s
+  private static final double max_vel = 1.5; // rad/s
+  private static final double max_accel = 2.7; // rad/s/s
   private static final Constraints constraints = new Constraints(max_vel, max_accel);
   private static double gravityCompensation = 0.02;
 
@@ -42,10 +40,10 @@ public class Arm extends ProfiledPIDSubsystem {
     armIO.periodicUpdate();
 
     SmartDashboard.putNumber("arm/goal position", getGoal());
-    SmartDashboard.putNumber("arm/velocity", getEncoderSpeed()); 
-    SmartDashboard.putNumber("arm/postion", getEncoderPosition());   
+    SmartDashboard.putNumber("arm/velocity", getEncoderSpeed());
+    SmartDashboard.putNumber("arm/postion", getEncoderPosition());
   }
-  
+
   public double getEncoderPosition() {
     return armIO.getEncoderPosition();
   }
@@ -61,16 +59,17 @@ public class Arm extends ProfiledPIDSubsystem {
   }
 
   public double getTargetAngle() {
-    return targetAngle; 
+    return targetAngle;
   }
 
   public void setTargetAngle(double angle) {
     DataLogManager.log("Set target to " + angle);
-    targetAngle = angle; 
+    targetAngle = angle;
   }
 
   public void setSpeedGravityCompensation(double speed) {
-    // calls set speed function in the file that does armIO.setSpeed after capping speed
+    // calls set speed function in the file that does armIO.setSpeed after capping
+    // speed
     // DO NOT DELETE THE RANDOM 2; that's to account for the offset
     // TODO make it so there isn't a random 2?
     setSpeed(speed + gravityCompensation * Math.cos(getEncoderPosition() + 2));
@@ -87,11 +86,12 @@ public class Arm extends ProfiledPIDSubsystem {
 
     // Calculate the feedforward from the setpoint
     double speed = feedForward * setpoint.velocity;
-    //accounts for gravity in speed
-    speed += gravityCompensation * Math.cos(getEncoderPosition()); 
+    // accounts for gravity in speed
+    speed += gravityCompensation * Math.cos(getEncoderPosition());
     // Add PID output to speed to account for error in arm
     speed += output;
-    // calls set speed function in the file that does armIO.setSpeed after capping speed
+    // calls set speed function in the file that does armIO.setSpeed after capping
+    // speed
     setSpeed(speed);
   }
 
@@ -104,11 +104,11 @@ public class Arm extends ProfiledPIDSubsystem {
     return m_controller.getGoal().position;
   }
 
-    // Checks to see if arm is within range of the setpoints
-    public boolean atGoal() {
-      return (PIDUtil.checkWithinRange(getGoal(), getMeasurement(), ArmConstants.ANGLE_TOLERANCE_AUTON));
-    }
-  
+  // Checks to see if arm is within range of the setpoints
+  public boolean atGoal() {
+    return (PIDUtil.checkWithinRange(getGoal(), getMeasurement(), ArmConstants.ANGLE_TOLERANCE_AUTON));
+  }
+
   public void setPosition(double position) {
     armIO.setPosition(position);
   }

@@ -49,59 +49,58 @@ public class DriveTrain extends SubsystemBase {
   private LinearFilter derivativeCalculator = LinearFilter.backwardFiniteDifference(1, 2, 0.02);
   private double pitchRate;
 
-
   public DriveTrain() {
 
     ahrs = new AHRS(SPI.Port.kMXP, (byte) 66);
     ahrs.reset();
 
-    //right front
+    // right front
     steer1 = new CANSparkMax(32, MotorType.kBrushless);
     drive1 = new CANSparkMax(31, MotorType.kBrushless);
 
-    //left front
+    // left front
     steer2 = new CANSparkMax(12, MotorType.kBrushless);
     drive2 = new CANSparkMax(11, MotorType.kBrushless);
 
-    //left back
+    // left back
     steer3 = new CANSparkMax(22, MotorType.kBrushless);
     drive3 = new CANSparkMax(21, MotorType.kBrushless);
 
-    //right back
+    // right back
     steer4 = new CANSparkMax(42, MotorType.kBrushless);
     drive4 = new CANSparkMax(41, MotorType.kBrushless);
 
-    //driving factory resets
+    // driving factory resets
     drive1.restoreFactoryDefaults();
     drive2.restoreFactoryDefaults();
     drive3.restoreFactoryDefaults();
     drive4.restoreFactoryDefaults();
 
-    //steering factory resets
+    // steering factory resets
     steer1.restoreFactoryDefaults();
     steer2.restoreFactoryDefaults();
     steer3.restoreFactoryDefaults();
     steer4.restoreFactoryDefaults();
 
-    //drive current limits
+    // drive current limits
     drive1.setSmartCurrentLimit(50);
     drive2.setSmartCurrentLimit(50);
     drive3.setSmartCurrentLimit(50);
     drive4.setSmartCurrentLimit(50);
 
-    //steer current limits
+    // steer current limits
     steer1.setSmartCurrentLimit(20);
     steer2.setSmartCurrentLimit(20);
     steer3.setSmartCurrentLimit(20);
     steer4.setSmartCurrentLimit(20);
 
-    //driving motor inversion
+    // driving motor inversion
     drive1.setInverted(false);
     drive2.setInverted(false);
     drive3.setInverted(false);
     drive4.setInverted(false);
 
-    //steering motor inversion 
+    // steering motor inversion
     steer1.setInverted(true);
     steer2.setInverted(true);
     steer3.setInverted(true);
@@ -128,14 +127,15 @@ public class DriveTrain extends SubsystemBase {
     driveEncoder3.setPosition(0);
     driveEncoder4.setPosition(0);
 
-    //native unit is rotations, converting to meters
-    //1 rotation = x wheel revolutions (using gear ratio) = y inches (using circumference) = z meters
+    // native unit is rotations, converting to meters
+    // 1 rotation = x wheel revolutions (using gear ratio) = y inches (using
+    // circumference) = z meters
     driveEncoder1.setPositionConversionFactor(0.0508);
     driveEncoder2.setPositionConversionFactor(0.0508);
     driveEncoder3.setPositionConversionFactor(0.0508);
     driveEncoder4.setPositionConversionFactor(0.0508);
 
-    //native unit is RPM, converting to m/s
+    // native unit is RPM, converting to m/s
     driveEncoder1.setVelocityConversionFactor(0.0508 / 60);
     driveEncoder2.setVelocityConversionFactor(0.0508 / 60);
     driveEncoder3.setVelocityConversionFactor(0.0508 / 60);
@@ -152,16 +152,15 @@ public class DriveTrain extends SubsystemBase {
     steerEncoder3.setInverted(false);
     steerEncoder4.setInverted(false);
 
-    
     steerEncoder1.setPositionConversionFactor(2 * Math.PI);
     steerEncoder2.setPositionConversionFactor(2 * Math.PI);
     steerEncoder3.setPositionConversionFactor(2 * Math.PI);
     steerEncoder4.setPositionConversionFactor(2 * Math.PI);
 
     steerEncoder1.setZeroOffset(convertToSparkMaxAngle(0 + DriveTrainConstants.ENCODER1_OFFSET));
-    steerEncoder2.setZeroOffset(convertToSparkMaxAngle(Math.PI/2 + DriveTrainConstants.ENCODER2_OFFSET));
+    steerEncoder2.setZeroOffset(convertToSparkMaxAngle(Math.PI / 2 + DriveTrainConstants.ENCODER2_OFFSET));
     steerEncoder3.setZeroOffset(convertToSparkMaxAngle(Math.PI + DriveTrainConstants.ENCODER3_OFFSET));
-    steerEncoder4.setZeroOffset(convertToSparkMaxAngle(-Math.PI/2 + DriveTrainConstants.ENCODER4_OFFSET));
+    steerEncoder4.setZeroOffset(convertToSparkMaxAngle(-Math.PI / 2 + DriveTrainConstants.ENCODER4_OFFSET));
 
     // steering pid controllers
     var controller1 = steer1.getPIDController();
@@ -182,7 +181,7 @@ public class DriveTrain extends SubsystemBase {
     controller3.setPositionPIDWrappingEnabled(true);
     controller4.setPositionPIDWrappingEnabled(true);
 
-    //setting max and min inputs for encoder positions
+    // setting max and min inputs for encoder positions
     controller1.setPositionPIDWrappingMinInput(DriveTrainConstants.kTurningEncoderPositionPIDMinInput);
     controller1.setPositionPIDWrappingMaxInput(DriveTrainConstants.kTurningEncoderPositionPIDMaxInput);
     controller2.setPositionPIDWrappingMinInput(DriveTrainConstants.kTurningEncoderPositionPIDMinInput);
@@ -209,30 +208,29 @@ public class DriveTrain extends SubsystemBase {
   }
 
   @Override
-  public void periodic()
-  {
-      // This will get the simulated sensor readings that we set
-  // in the previous article while in simulation, but will use
-  // real values on the robot itself.
-//   m_odometry.update(m_gyro.getRotation2d(),
-//   m_leftEncoder.getDistance(),
-//   m_rightEncoder.getDistance());
-// m_field.setRobotPose(m_odometry.getPoseMeters());
+  public void periodic() {
+    // This will get the simulated sensor readings that we set
+    // in the previous article while in simulation, but will use
+    // real values on the robot itself.
+    // m_odometry.update(m_gyro.getRotation2d(),
+    // m_leftEncoder.getDistance(),
+    // m_rightEncoder.getDistance());
+    // m_field.setRobotPose(m_odometry.getPoseMeters());
     SmartDashboard.putNumber("Gyro angle", ahrs.getAngle());
     pitchRate = derivativeCalculator.calculate(getGyroPitch());
 
   }
 
   public void setSpeed(double fwd, double str, double rcw) {
-  
+
     SmartDashboard.putNumber("Encoder position: ", driveEncoder1.getPosition());
-    //field oriented
+    // field oriented
     double angleRad = Math.toRadians(ahrs.getAngle());
-        double temp = fwd * Math.cos(angleRad) +
-                str * Math.sin(angleRad);
-        str = -fwd * Math.sin(angleRad) + str * Math.cos(angleRad);
-        fwd = temp;
-    
+    double temp = fwd * Math.cos(angleRad) +
+        str * Math.sin(angleRad);
+    str = -fwd * Math.sin(angleRad) + str * Math.cos(angleRad);
+    fwd = temp;
+
     double rcw_fwd = rcw * Math.sin(DriveTrainConstants.THETA);
     double rcw_str = rcw * Math.cos(DriveTrainConstants.THETA);
 
@@ -250,7 +248,8 @@ public class DriveTrain extends SubsystemBase {
     double str4 = str - rcw_str;
 
     double currentAngle1 = steerEncoder1.getPosition();
-    //SmartDashboard.putNumber("Current angle", Units.radiansToDegrees(currentAngle1));
+    // SmartDashboard.putNumber("Current angle",
+    // Units.radiansToDegrees(currentAngle1));
     double currentAngle2 = steerEncoder2.getPosition();
     double currentAngle3 = steerEncoder3.getPosition();
     double currentAngle4 = steerEncoder4.getPosition();
@@ -258,7 +257,8 @@ public class DriveTrain extends SubsystemBase {
     // calculate the speed and angle for each wheel
     double speed1 = Math.sqrt(fwd1 * fwd1 + str1 * str1);
     double angle1 = Math.atan2(str1, fwd1);
-    //SmartDashboard.putNumber("Target angle", Units.radiansToDegrees(convertToSparkMaxAngle(angle1)));
+    // SmartDashboard.putNumber("Target angle",
+    // Units.radiansToDegrees(convertToSparkMaxAngle(angle1)));
 
     double speed2 = Math.sqrt(fwd2 * fwd2 + str2 * str2);
     double angle2 = Math.atan2(str2, fwd2);
@@ -288,23 +288,21 @@ public class DriveTrain extends SubsystemBase {
     double flippedSpeed4 = flipAngleAndSpeed4[1];
     double flippedAngle4 = flipAngleAndSpeed4[0];
 
-    //limiting speeds in case they go over 1 (normalize or desaturate)
+    // limiting speeds in case they go over 1 (normalize or desaturate)
     double speedProportion = 1;
-    double maxSpeed = Math.max(Math.abs(flippedSpeed1), 
-                      Math.max(Math.abs(flippedSpeed2), 
-                      Math.max(Math.abs(flippedSpeed3), Math.abs(flippedSpeed4))));
-    if (maxSpeed > 1)
-    {
+    double maxSpeed = Math.max(Math.abs(flippedSpeed1),
+        Math.max(Math.abs(flippedSpeed2),
+            Math.max(Math.abs(flippedSpeed3), Math.abs(flippedSpeed4))));
+    if (maxSpeed > 1) {
       speedProportion = maxSpeed;
     }
 
-
     SmartDashboard.putNumber("Max Speed", maxSpeed);
-    SmartDashboard.putNumber("Speed 1", flippedSpeed1/speedProportion);
-  
+    SmartDashboard.putNumber("Speed 1", flippedSpeed1 / speedProportion);
+
     // set all wheel speeds
     if (flippedSpeed1 != 0) {
-      drive1.set(flippedSpeed1/speedProportion * 0.5);
+      drive1.set(flippedSpeed1 / speedProportion * 0.5);
       steer1.getPIDController().setReference(convertToSparkMaxAngle(flippedAngle1), ControlType.kPosition);
 
     } else {
@@ -313,7 +311,7 @@ public class DriveTrain extends SubsystemBase {
     }
 
     if (flippedSpeed2 != 0) {
-      drive2.set(flippedSpeed2/speedProportion * 0.5);
+      drive2.set(flippedSpeed2 / speedProportion * 0.5);
       steer2.getPIDController().setReference(convertToSparkMaxAngle(flippedAngle2), ControlType.kPosition);
 
     } else {
@@ -322,7 +320,7 @@ public class DriveTrain extends SubsystemBase {
     }
 
     if (flippedSpeed3 != 0) {
-      drive3.set(flippedSpeed3/speedProportion * 0.5);
+      drive3.set(flippedSpeed3 / speedProportion * 0.5);
       steer3.getPIDController().setReference(convertToSparkMaxAngle(flippedAngle3), ControlType.kPosition);
 
     } else {
@@ -331,14 +329,14 @@ public class DriveTrain extends SubsystemBase {
     }
 
     if (flippedSpeed4 != 0) {
-      drive4.set(flippedSpeed4/speedProportion * 0.5);
+      drive4.set(flippedSpeed4 / speedProportion * 0.5);
       steer4.getPIDController().setReference(convertToSparkMaxAngle(flippedAngle4), ControlType.kPosition);
 
     } else {
       drive4.set(0);
       steer4.set(0);
     }
-    
+
   }
 
   public static void setWheelAngles(double angle1, double angle2, double angle3, double angle4) {
@@ -347,8 +345,6 @@ public class DriveTrain extends SubsystemBase {
     steer3.getPIDController().setReference(convertToSparkMaxAngle(angle3), ControlType.kPosition);
     steer4.getPIDController().setReference(convertToSparkMaxAngle(angle4), ControlType.kPosition);
   }
-
-
 
   public static double[] flipAngle(double currentAngle, double targetAngle, double speed) {
     double[] changedValues = new double[2];
@@ -366,54 +362,52 @@ public class DriveTrain extends SubsystemBase {
     changedValues[1] = desiredSpeed;
     return changedValues;
     // double[] values = {targetAngle, speed};
-    // return values; 
-  }
-// convert zero to 2pi range to negative pi to pi range
-  public static double convertFromSparkMaxAngle(double currentAngle){
-    if (currentAngle >= 0 && currentAngle <= Math.PI)
-    {
-      return currentAngle; 
-    }
-     currentAngle= currentAngle - 2 * Math.PI;
-
-    while(currentAngle < -Math.PI){
-      currentAngle += Math.PI*2;
-    }
-    while(currentAngle > Math.PI){
-      currentAngle-=Math.PI*2;
-  }
-  return currentAngle;
+    // return values;
   }
 
-//convert from negative pi to pi range to zero to 2pi range
+  // convert zero to 2pi range to negative pi to pi range
+  public static double convertFromSparkMaxAngle(double currentAngle) {
+    if (currentAngle >= 0 && currentAngle <= Math.PI) {
+      return currentAngle;
+    }
+    currentAngle = currentAngle - 2 * Math.PI;
+
+    while (currentAngle < -Math.PI) {
+      currentAngle += Math.PI * 2;
+    }
+    while (currentAngle > Math.PI) {
+      currentAngle -= Math.PI * 2;
+    }
+    return currentAngle;
+  }
+
+  // convert from negative pi to pi range to zero to 2pi range
   public static double convertToSparkMaxAngle(double angle) {
 
-    if (angle >= 0 && angle <= Math.PI)
-    {
-      return angle; 
+    if (angle >= 0 && angle <= Math.PI) {
+      return angle;
     }
-    angle= angle+Math.PI * 2;
-    while(angle < 0){
-      angle += Math.PI*2;
+    angle = angle + Math.PI * 2;
+    while (angle < 0) {
+      angle += Math.PI * 2;
     }
-    while(angle>Math.PI *2){
-      angle-=Math.PI*2;
+    while (angle > Math.PI * 2) {
+      angle -= Math.PI * 2;
     }
     return angle;
   }
 
-  public double getAverageEncoderMeters()
-  {
-    return (driveEncoder1.getPosition() + driveEncoder2.getPosition() + driveEncoder3.getPosition() + driveEncoder4.getPosition()) / 4;
+  public double getAverageEncoderMeters() {
+    return (driveEncoder1.getPosition() + driveEncoder2.getPosition() + driveEncoder3.getPosition()
+        + driveEncoder4.getPosition()) / 4;
   }
 
   public double getGyroPitch() {
     return -ahrs.getPitch();
   }
 
-  public double getGyroPitchRate()
-  {
-      return pitchRate;
+  public double getGyroPitchRate() {
+    return pitchRate;
   }
 
   public void setDriveMotorVoltage(double drivePower1, double drivePower2, double drivePower3, double drivePower4) {
@@ -422,6 +416,5 @@ public class DriveTrain extends SubsystemBase {
     drive3.setVoltage(drivePower3);
     drive4.setVoltage(drivePower4);
   }
-
 
 }

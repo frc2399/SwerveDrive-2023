@@ -20,18 +20,17 @@ public class StallIntakeCmd extends CommandBase {
     int intakeCurrentLimit;
     double velocityThreshold = 100;
 
-
     public StallIntakeCmd(Intake intakeSubsystem, Supplier<Boolean> intake, Supplier<Boolean> outtake) {
         this.intakeSubsystem = intakeSubsystem;
         this.intake = intake;
         this.outtake = outtake;
-        //timer in constructor so it doesn't automatically intake when robot starts
+        // timer in constructor so it doesn't automatically intake when robot starts
         timer = new Timer();
         timer.start();
         addRequirements(intakeSubsystem);
     }
 
-      // Called when the command is initially scheduled.
+    // Called when the command is initially scheduled.
     @Override
     public void initialize() {
         debouncer = new Debouncer(0.15);
@@ -49,26 +48,22 @@ public class StallIntakeCmd extends CommandBase {
             if (debouncer.calculate(Math.abs(intakeSubsystem.getEncoderSpeed()) < velocityThreshold)) {
                 Intake.isIntooked = true;
             }
-        }
-        else if (outtake.get()) {
+        } else if (outtake.get()) {
             intakeSpeed = IntakeConstants.CUBE_OUT_SPEED;
             intakeCurrentLimit = IntakeConstants.OUT_CURRENT;
             Intake.isIntooked = false;
-        }
-        else if (Intake.isIntooked)
-        {
+        } else if (Intake.isIntooked) {
             // need more beans to intake
             intakeSpeed = 0.5 * (IntakeConstants.CUBE_IN_SPEED);
             intakeCurrentLimit = 3;
         }
-        // increased timer 
+        // increased timer
         else if (!timer.hasElapsed(1.5)) {
             intakeSpeed = IntakeConstants.CUBE_IN_SPEED;
             if (debouncer.calculate(Math.abs(intakeSubsystem.getEncoderSpeed()) < velocityThreshold)) {
                 Intake.isIntooked = true;
             }
-        }
-        else {
+        } else {
             intakeSpeed = 0;
             intakeCurrentLimit = 3;
         }
@@ -78,7 +73,7 @@ public class StallIntakeCmd extends CommandBase {
         }
         intakeSubsystem.setMotor(intakeSpeed);
         intakeSubsystem.setCurrentLimit(intakeCurrentLimit);
-        
+
         SmartDashboard.putNumber("intake/current limit", intakeCurrentLimit);
         SmartDashboard.putBoolean("intake/isIntooked", Intake.isIntooked);
         SmartDashboard.putNumber("intake/encoder speed", intakeSubsystem.getEncoderSpeed());
