@@ -86,4 +86,8 @@ public final class Constants {
 
 
   }
+
+  public static final class VisionConstants {
+    public static final String CAMERA_NAME = "2399";
+  }
 }
