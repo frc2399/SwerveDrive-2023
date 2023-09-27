@@ -1,4 +1,4 @@
-package frc.robot.commands.drivetrain;
+package frc.robot.commands;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.SlewRateLimiter;
@@ -8,11 +8,11 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.DriveTrain;
 
 /**
- * Strafes robot a given distance (relative to the robot's position upon initialization), and a given speed
- * POSITIVE INPUT TRANSLATES TO RIGHT
+ * Drives the robot forward a given distance (relative to the robot's position upon initialization), and a given speed
+ * only used for shuffleboard testing, not used in any commands
  **/
 
-public class StrafeGivenDistance extends CommandBase {
+public class DriveForwardGivenDistance extends CommandBase {
 
     //insantiate global variables
     double currentPosition1;
@@ -34,7 +34,7 @@ public class StrafeGivenDistance extends CommandBase {
 
     
  
-	public StrafeGivenDistance(double targetDistanceMeters, DriveTrain subsystem) {
+	public DriveForwardGivenDistance(double targetDistanceMeters, DriveTrain subsystem) {
         
         //initialize variables
         this.targetDistanceMeters = targetDistanceMeters;
@@ -85,7 +85,7 @@ public class StrafeGivenDistance extends CommandBase {
         outputSpeed = MathUtil.clamp(outputSpeed, -0.3, 0.3);
         outputSpeed  = driveLimiter.calculate(outputSpeed);
 
-        m_driveTrain.setSpeed(0, outputSpeed, 0);
+        m_driveTrain.setSpeed(outputSpeed, 0, 0);
     }
 
     // Make this return true when this Command no longer needs to run execute()

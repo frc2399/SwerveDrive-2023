@@ -5,6 +5,10 @@
 package frc.robot;
 
 import frc.robot.Constants.ArmConstants;
+import frc.robot.commands.DriveForwardGivenDistance;
+import frc.robot.commands.IntakeForGivenTime;
+import frc.robot.commands.StallIntakeCmd;
+import frc.robot.commands.autonomous.ShootLeaveCommunity;
 import frc.robot.subsystems.DriveTrain;
 import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.arm.ArmIO;
@@ -34,7 +38,6 @@ import edu.wpi.first.wpilibj2.command.SelectCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.commands.drivetrain.StallIntakeCmd;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -181,6 +184,9 @@ public class RobotContainer {
 
   private void setUpAutonChooser() {
     chooser.setDefaultOption("do nothing", new PrintCommand("i am doing nothing"));
+    chooser.addOption("shoot", new IntakeForGivenTime(intake, -0.5, 1));
+    chooser.addOption("leave community", new DriveForwardGivenDistance(-4.2, m_driveTrain));
+    chooser.addOption("shoot and leave community", new ShootLeaveCommunity(m_driveTrain, intake, arm));
   }
 
   public static Command makeSetPositionCommand(ProfiledPIDSubsystem base, double target) {
@@ -196,7 +202,7 @@ public class RobotContainer {
         new RunCommand(() -> a.setSpeedGravityCompensation(speed), a));
   }
 
-  private static Command resetArmEncoderCommand(Arm a) {
+  public static Command resetArmEncoderCommand(Arm a) {
     Debouncer debouncer = new Debouncer(0.2);
     return new SequentialCommandGroup(
         new InstantCommand(() -> a.disable()),
