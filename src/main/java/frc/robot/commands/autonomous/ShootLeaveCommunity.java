@@ -1,7 +1,9 @@
 package frc.robot.commands.autonomous;
 
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.RobotContainer;
+import frc.robot.Constants.ArmConstants;
 import frc.robot.commands.DriveForwardGivenDistance;
 import frc.robot.commands.IntakeForGivenTime;
 import frc.robot.subsystems.DriveTrain;
@@ -14,7 +16,9 @@ public class ShootLeaveCommunity extends SequentialCommandGroup {
     {
         addCommands(
             RobotContainer.resetArmEncoderCommand(arm),
-            new IntakeForGivenTime(intake, -0.5, 1.0),
+            RobotContainer.makeSetPositionCommand(arm, ArmConstants.CUBE_SHOOT_ANGLE),
+            new WaitUntilCommand(() -> arm.atGoal()),
+            new IntakeForGivenTime(intake, -0.5, 1),
             new DriveForwardGivenDistance(-4.2, driveTrain)
 
         );

@@ -47,6 +47,9 @@ public class DriveForwardGivenDistance extends CommandBase {
 	// Called just before this Command runs the first time
     @Override
     public void initialize() {
+        
+        DriveTrain.setWheelAngles(0, 0, 0, 0);
+
         // Sets the current position to where robot is starting
         initialPosition1 = m_driveTrain.driveEncoder1.getPosition();
         initialPosition2 = m_driveTrain.driveEncoder2.getPosition();

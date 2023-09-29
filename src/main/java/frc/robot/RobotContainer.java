@@ -36,6 +36,7 @@ import edu.wpi.first.wpilibj2.command.ProfiledPIDSubsystem;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SelectCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -184,8 +185,12 @@ public class RobotContainer {
 
   private void setUpAutonChooser() {
     chooser.setDefaultOption("do nothing", new PrintCommand("i am doing nothing"));
-    chooser.addOption("shoot", new IntakeForGivenTime(intake, -0.5, 1));
-    chooser.addOption("leave community", new DriveForwardGivenDistance(-4.2, m_driveTrain));
+    chooser.addOption("shoot", new SequentialCommandGroup (
+        resetArmEncoderCommand(arm),
+        makeSetPositionCommand(arm, ArmConstants.CUBE_SHOOT_ANGLE),
+        new WaitUntilCommand(() -> arm.atGoal()),
+        new IntakeForGivenTime(intake, -0.5, 1)));
+    chooser.addOption("leave community", (new DriveForwardGivenDistance(-4.2, m_driveTrain)));
     chooser.addOption("shoot and leave community", new ShootLeaveCommunity(m_driveTrain, intake, arm));
   }
 
