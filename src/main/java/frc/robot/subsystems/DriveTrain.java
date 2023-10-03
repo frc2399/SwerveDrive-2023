@@ -163,47 +163,68 @@ public class DriveTrain extends SubsystemBase {
     steerEncoder4.setZeroOffset(convertToSparkMaxAngle(-Math.PI / 2 + DriveTrainConstants.ENCODER4_OFFSET));
 
     // steering pid controllers
-    var controller1 = steer1.getPIDController();
-    var controller2 = steer2.getPIDController();
-    var controller3 = steer3.getPIDController();
-    var controller4 = steer4.getPIDController();
+    var steerController1 = steer1.getPIDController();
+    var steerController2 = steer2.getPIDController();
+    var steerController3 = steer3.getPIDController();
+    var steerController4 = steer4.getPIDController();
+
+    // steering pid controllers
+    var driveController1 = drive1.getPIDController();
+    var driveController2 = drive2.getPIDController();
+    var driveController3 = drive3.getPIDController();
+    var driveController4 = drive4.getPIDController();
 
     // giving the controller an encoder to read values from
-    controller1.setFeedbackDevice(steerEncoder1);
-    controller2.setFeedbackDevice(steerEncoder2);
-    controller3.setFeedbackDevice(steerEncoder3);
-    controller4.setFeedbackDevice(steerEncoder4);
+    steerController1.setFeedbackDevice(steerEncoder1);
+    steerController2.setFeedbackDevice(steerEncoder2);
+    steerController3.setFeedbackDevice(steerEncoder3);
+    steerController4.setFeedbackDevice(steerEncoder4);
+
+    driveController1.setFeedbackDevice(driveEncoder1);
+    driveController2.setFeedbackDevice(driveEncoder2);
+    driveController3.setFeedbackDevice(driveEncoder3);
+    driveController4.setFeedbackDevice(driveEncoder4);
 
     // if the sensor value is greater than 360, it wraps the number such that the
     // value is between 0 and 360
-    controller1.setPositionPIDWrappingEnabled(true);
-    controller2.setPositionPIDWrappingEnabled(true);
-    controller3.setPositionPIDWrappingEnabled(true);
-    controller4.setPositionPIDWrappingEnabled(true);
+    steerController1.setPositionPIDWrappingEnabled(true);
+    steerController2.setPositionPIDWrappingEnabled(true);
+    steerController3.setPositionPIDWrappingEnabled(true);
+    steerController4.setPositionPIDWrappingEnabled(true);
 
     // setting max and min inputs for encoder positions
-    controller1.setPositionPIDWrappingMinInput(DriveTrainConstants.kTurningEncoderPositionPIDMinInput);
-    controller1.setPositionPIDWrappingMaxInput(DriveTrainConstants.kTurningEncoderPositionPIDMaxInput);
-    controller2.setPositionPIDWrappingMinInput(DriveTrainConstants.kTurningEncoderPositionPIDMinInput);
-    controller2.setPositionPIDWrappingMaxInput(DriveTrainConstants.kTurningEncoderPositionPIDMaxInput);
-    controller3.setPositionPIDWrappingMinInput(DriveTrainConstants.kTurningEncoderPositionPIDMinInput);
-    controller3.setPositionPIDWrappingMaxInput(DriveTrainConstants.kTurningEncoderPositionPIDMaxInput);
-    controller4.setPositionPIDWrappingMinInput(DriveTrainConstants.kTurningEncoderPositionPIDMinInput);
-    controller4.setPositionPIDWrappingMaxInput(DriveTrainConstants.kTurningEncoderPositionPIDMaxInput);
+    steerController1.setPositionPIDWrappingMinInput(DriveTrainConstants.kTurningEncoderPositionPIDMinInput);
+    steerController1.setPositionPIDWrappingMaxInput(DriveTrainConstants.kTurningEncoderPositionPIDMaxInput);
+    steerController2.setPositionPIDWrappingMinInput(DriveTrainConstants.kTurningEncoderPositionPIDMinInput);
+    steerController2.setPositionPIDWrappingMaxInput(DriveTrainConstants.kTurningEncoderPositionPIDMaxInput);
+    steerController3.setPositionPIDWrappingMinInput(DriveTrainConstants.kTurningEncoderPositionPIDMinInput);
+    steerController3.setPositionPIDWrappingMaxInput(DriveTrainConstants.kTurningEncoderPositionPIDMaxInput);
+    steerController4.setPositionPIDWrappingMinInput(DriveTrainConstants.kTurningEncoderPositionPIDMinInput);
+    steerController4.setPositionPIDWrappingMaxInput(DriveTrainConstants.kTurningEncoderPositionPIDMaxInput);
 
     // sets P gain for the PID loop
     // TODO: tune the P gain
-    controller1.setP(1);
-    controller2.setP(1);
-    controller3.setP(1);
-    controller4.setP(1);
+    steerController1.setP(1);
+    steerController2.setP(1);
+    steerController3.setP(1);
+    steerController4.setP(1);
+
+    driveController1.setFF(1);
+    driveController2.setFF(1);
+    driveController3.setFF(1);
+    driveController4.setFF(1);
+    
+    // driveController1.setP(1);
+    // driveController2.setP(1);
+    // driveController3.setP(1);
+    // driveController4.setP(1);
 
     // gives the controller a target value that is a position. since this is in the
     // constructor, we set the target to 0 so that the robot does not move
-    controller1.setReference(convertToSparkMaxAngle(0), ControlType.kPosition);
-    controller2.setReference(convertToSparkMaxAngle(0), ControlType.kPosition);
-    controller3.setReference(convertToSparkMaxAngle(0), ControlType.kPosition);
-    controller4.setReference(convertToSparkMaxAngle(0), ControlType.kPosition);
+    steerController1.setReference(convertToSparkMaxAngle(0), ControlType.kPosition);
+    steerController2.setReference(convertToSparkMaxAngle(0), ControlType.kPosition);
+    steerController3.setReference(convertToSparkMaxAngle(0), ControlType.kPosition);
+    steerController4.setReference(convertToSparkMaxAngle(0), ControlType.kPosition);
 
   }
 
@@ -302,7 +323,7 @@ public class DriveTrain extends SubsystemBase {
 
     // set all wheel speeds
     if (flippedSpeed1 != 0) {
-      drive1.set(flippedSpeed1 / speedProportion * 0.5);
+      drive1.getPIDController().setReference(flippedSpeed1 / speedProportion * 0.5, ControlType.kVelocity);
       steer1.getPIDController().setReference(convertToSparkMaxAngle(flippedAngle1), ControlType.kPosition);
 
     } else {
@@ -311,7 +332,7 @@ public class DriveTrain extends SubsystemBase {
     }
 
     if (flippedSpeed2 != 0) {
-      drive2.set(flippedSpeed2 / speedProportion * 0.5);
+      drive2.getPIDController().setReference(flippedSpeed2 / speedProportion * 0.5, ControlType.kVelocity);
       steer2.getPIDController().setReference(convertToSparkMaxAngle(flippedAngle2), ControlType.kPosition);
 
     } else {
@@ -320,7 +341,7 @@ public class DriveTrain extends SubsystemBase {
     }
 
     if (flippedSpeed3 != 0) {
-      drive3.set(flippedSpeed3 / speedProportion * 0.5);
+      drive3.getPIDController().setReference(flippedSpeed3 / speedProportion * 0.5, ControlType.kVelocity);
       steer3.getPIDController().setReference(convertToSparkMaxAngle(flippedAngle3), ControlType.kPosition);
 
     } else {
@@ -329,7 +350,7 @@ public class DriveTrain extends SubsystemBase {
     }
 
     if (flippedSpeed4 != 0) {
-      drive4.set(flippedSpeed4 / speedProportion * 0.5);
+      drive4.getPIDController().setReference(flippedSpeed4 / speedProportion * 0.5, ControlType.kVelocity);
       steer4.getPIDController().setReference(convertToSparkMaxAngle(flippedAngle4), ControlType.kPosition);
 
     } else {
