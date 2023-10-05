@@ -319,7 +319,10 @@ public class DriveTrain extends SubsystemBase {
     }
 
     SmartDashboard.putNumber("Max Speed", maxSpeed);
-    SmartDashboard.putNumber("Speed 1", flippedSpeed1 / speedProportion);
+    SmartDashboard.putNumber("Speed 1", flippedSpeed1 / speedProportion * 0.5);
+    SmartDashboard.putNumber("Speed 2", flippedSpeed2 / speedProportion * 0.5);
+    SmartDashboard.putNumber("Speed 3", flippedSpeed3 / speedProportion * 0.5);
+    SmartDashboard.putNumber("Speed 4", flippedSpeed4 / speedProportion * 0.5);
 
     // set all wheel speeds
     if (flippedSpeed1 != 0) {
