@@ -17,6 +17,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.Constants.DriveTrainConstants;
 import frc.robot.util.NavX.AHRS;
 
@@ -204,20 +205,29 @@ public class DriveTrain extends SubsystemBase {
 
     // sets P gain for the PID loop
     // TODO: tune the P gain
+    //Percent output per radian
     steerController1.setP(1);
     steerController2.setP(1);
     steerController3.setP(1);
     steerController4.setP(1);
 
-    driveController1.setFF(1);
-    driveController2.setFF(1);
-    driveController3.setFF(1);
-    driveController4.setFF(1);
+    // Percent output per radian, multiplied by error
+    steerController1.setD(.001);
+    steerController2.setD(.001);
+    steerController3.setD(.001);
+    steerController4.setD(.001);
     
-    // driveController1.setP(1);
-    // driveController2.setP(1);
-    // driveController3.setP(1);
-    // driveController4.setP(1);
+    // Percent output per m/s, multiplied by setpoint
+    driveController1.setFF(.2);
+    driveController2.setFF(.2);
+    driveController3.setFF(.2);
+    driveController4.setFF(.2);
+    
+    // Percent output per m/s, multiplied by error
+    driveController1.setP(.01);
+    driveController2.setP(.01);
+    driveController3.setP(.01);
+    driveController4.setP(.01);
 
     // gives the controller a target value that is a position. since this is in the
     // constructor, we set the target to 0 so that the robot does not move
@@ -326,7 +336,7 @@ public class DriveTrain extends SubsystemBase {
 
     // set all wheel speeds
     if (flippedSpeed1 != 0) {
-      drive1.getPIDController().setReference(flippedSpeed1 / speedProportion * 0.5, ControlType.kVelocity);
+      drive1.getPIDController().setReference((Constants.DriveTrainConstants.MAX_DRIVE_VELOCITY * flippedSpeed1 / speedProportion) * 0.5, ControlType.kVelocity);
       steer1.getPIDController().setReference(convertToSparkMaxAngle(flippedAngle1), ControlType.kPosition);
 
     } else {
@@ -335,7 +345,7 @@ public class DriveTrain extends SubsystemBase {
     }
 
     if (flippedSpeed2 != 0) {
-      drive2.getPIDController().setReference(flippedSpeed2 / speedProportion * 0.5, ControlType.kVelocity);
+      drive2.getPIDController().setReference((Constants.DriveTrainConstants.MAX_DRIVE_VELOCITY * flippedSpeed2 / speedProportion) * 0.5, ControlType.kVelocity);
       steer2.getPIDController().setReference(convertToSparkMaxAngle(flippedAngle2), ControlType.kPosition);
 
     } else {
@@ -344,7 +354,7 @@ public class DriveTrain extends SubsystemBase {
     }
 
     if (flippedSpeed3 != 0) {
-      drive3.getPIDController().setReference(flippedSpeed3 / speedProportion * 0.5, ControlType.kVelocity);
+      drive3.getPIDController().setReference((Constants.DriveTrainConstants.MAX_DRIVE_VELOCITY * flippedSpeed3 / speedProportion) * 0.5, ControlType.kVelocity);
       steer3.getPIDController().setReference(convertToSparkMaxAngle(flippedAngle3), ControlType.kPosition);
 
     } else {
@@ -353,7 +363,7 @@ public class DriveTrain extends SubsystemBase {
     }
 
     if (flippedSpeed4 != 0) {
-      drive4.getPIDController().setReference(flippedSpeed4 / speedProportion * 0.5, ControlType.kVelocity);
+      drive4.getPIDController().setReference((Constants.DriveTrainConstants.MAX_DRIVE_VELOCITY * flippedSpeed4 / speedProportion) * 0.5, ControlType.kVelocity);
       steer4.getPIDController().setReference(convertToSparkMaxAngle(flippedAngle4), ControlType.kPosition);
 
     } else {

@@ -26,6 +26,9 @@ public final class Constants {
     public static final double HALF_LENGTH = 23/2.0;
     public static final double HALF_WIDTH = 23/2.0;
 
+    // max velocity for drive motors, in m/s
+    public static final double MAX_DRIVE_VELOCITY = 4.5;
+
     //robot radius in inches 
     public static final double RADIUS = Math.sqrt(HALF_LENGTH * HALF_LENGTH + HALF_WIDTH * HALF_WIDTH); 
 
