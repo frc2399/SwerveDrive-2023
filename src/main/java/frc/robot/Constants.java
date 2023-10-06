@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import com.revrobotics.CANSparkMax.IdleMode;
+
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.util.Units;
@@ -35,7 +37,33 @@ public final class Constants {
     public static final double kTurningEncoderPositionPIDMinInput = 0;
     public static final double kTurningEncoderPositionPIDMaxInput = 2 * Math.PI; 
 
+    public static final double kDrivingEncoderPositionFactor = 0.0508;
+    public static final double kDrivingEncoderVelocityFactor = 0.0508 / 60;
 
+    public static final double kTurningEncoderPositionFactor = 2 * Math.PI;
+    public static final double kTurningEncoderVelocityFactor = 2 * Math.PI;
+
+    public static final boolean kTurningEncoderInverted = true;
+
+    public static final double kDrivingP = 0.04;
+    public static final double kDrivingI = 0;
+    public static final double kDrivingD = 0;
+    public static final double kDrivingFF = 1 / kDriveWheelFreeSpeedRps;
+    public static final double kDrivingMinOutput = -1;
+    public static final double kDrivingMaxOutput = 1;
+
+    public static final double kTurningP = 1;
+    public static final double kTurningI = 0;
+    public static final double kTurningD = 0;
+    public static final double kTurningFF = 0;
+    public static final double kTurningMinOutput = -1;
+    public static final double kTurningMaxOutput = 1;
+
+    public static final IdleMode kDrivingMotorIdleMode = IdleMode.kBrake;
+    public static final IdleMode kTurningMotorIdleMode = IdleMode.kBrake;
+
+    public static final int kDrivingMotorCurrentLimit = 50; // amps
+    public static final int kTurningMotorCurrentLimit = 20; // amps
 
     public static final SwerveDriveKinematics kDriveKinematics = new SwerveDriveKinematics(
       new Translation2d(HALF_LENGTH, HALF_WIDTH),
