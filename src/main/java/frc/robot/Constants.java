@@ -24,61 +24,104 @@ public final class Constants {
   public static final int NEO_CURRENT_LIMIT = 60;
   
   public static class DriveTrainConstants {
-    //robot half width and half length in inches, determined by the full width/length divided by 2
-    public static final double HALF_LENGTH = 23/2.0;
-    public static final double HALF_WIDTH = 23/2.0;
+    // ***Chassis configuration
 
-    //robot radius in inches 
-    public static final double RADIUS = Math.sqrt(HALF_LENGTH * HALF_LENGTH + HALF_WIDTH * HALF_WIDTH); 
+    // Distance between centers of right and left wheels on robot
+    public static final double TRACK_WIDTH = Units.inchesToMeters(23.0);
+    // Distance between front and back wheels on robot
+    public static final double TRACK_LENGTH = Units.inchesToMeters(23.0);
+    
+    // Create swerve kinematics
+    public static final SwerveDriveKinematics DRIVE_KINEMATICS = new SwerveDriveKinematics(
+        new Translation2d(TRACK_LENGTH / 2, TRACK_WIDTH / 2),
+        new Translation2d(TRACK_LENGTH / 2, -TRACK_WIDTH / 2),
+        new Translation2d(-TRACK_LENGTH / 2, TRACK_WIDTH / 2),
+        new Translation2d(-TRACK_LENGTH / 2, -TRACK_WIDTH / 2));
 
-    //angle formed by the half length and radius of the robot, in radians 
-    public static final double THETA = Math.acos(HALF_LENGTH / RADIUS); 
+    // Angular offsets of the modules relative to the chassis in radians
+    public static final double FRONT_LEFT_CHASSIS_ANGULAR_OFFSET = -Math.PI / 2;
+    public static final double FRONT_RIGHT_CHASSIS_ANGULAR_OFFSET = 0;
+    public static final double REAR_LEFT_CHASSIS_ANGULAR_OFFSET = Math.PI;
+    public static final double REAR_RIGHT_CHASSIS_ANGULAR_OFFSET = Math.PI / 2;
 
-    public static final double kTurningEncoderPositionPIDMinInput = 0;
-    public static final double kTurningEncoderPositionPIDMaxInput = 2 * Math.PI; 
+    // SPARK MAX CAN IDs
+    public static final int FRONT_LEFT_DRIVING_CAN_ID = 11;
+    public static final int REAR_LEFT_DRIVING_CAN_ID = 13;
+    public static final int FRONT_RIGHT_DRIVING_CAN_ID = 15;
+    public static final int REAR_RIGHT_DRIVING_CAN_ID = 17;
 
-    public static final double kDrivingEncoderPositionFactor = 0.0508;
-    public static final double kDrivingEncoderVelocityFactor = 0.0508 / 60;
+    public static final int FRONT_LEFT_TURNING_CAN_ID = 10;
+    public static final int REAR_LEFT_TURNING_CAN_ID = 12;
+    public static final int FRONT_RIGHT_TURNING_CAN_ID = 14;
+    public static final int REAR_RIGHT_TURNING_CAN_ID = 16;
 
-    public static final double kTurningEncoderPositionFactor = 2 * Math.PI;
-    public static final double kTurningEncoderVelocityFactor = 2 * Math.PI;
+    public static final boolean GYRO_REVERSED = false;
+  }
 
-    public static final boolean kTurningEncoderInverted = true;
+  public static class ModuleConstants {
+    // ***Constants for swerve modules
 
-    public static final double kDrivingP = 0.04;
-    public static final double kDrivingI = 0;
-    public static final double kDrivingD = 0;
-    public static final double kDrivingFF = 1 / kDriveWheelFreeSpeedRps;
-    public static final double kDrivingMinOutput = -1;
-    public static final double kDrivingMaxOutput = 1;
+    // Pinion gear teeth drive motor
+    public static final double DRIVING_MOTOR_PINION_TEETH = 14;
 
-    public static final double kTurningP = 1;
-    public static final double kTurningI = 0;
-    public static final double kTurningD = 0;
-    public static final double kTurningFF = 0;
-    public static final double kTurningMinOutput = -1;
-    public static final double kTurningMaxOutput = 1;
+    // Turning encoder inversion boolean
+    public static final boolean TURNING_ENCODER_INVERTED = true;
 
-    public static final IdleMode kDrivingMotorIdleMode = IdleMode.kBrake;
-    public static final IdleMode kTurningMotorIdleMode = IdleMode.kBrake;
+    // Calculations required for driving motor conversion factors and feed forward
+    public static final double DRIVING_MOTOR_FREE_SPEED_RPS = 5676 / 60;
+    public static final double WHEEL_DIAMETER_METERS = 0.0762;
+    public static final double WHEEL_CIRCUMFERENCE_METERS = WHEEL_DIAMETER_METERS * Math.PI;
+    // 45 teeth on the wheel's bevel gear, 22 teeth on the first-stage spur gear, 15 teeth on the bevel pinion
+    public static final double DRIVING_MOTOR_REDUCTION = (45.0 * 22) / (DRIVING_MOTOR_PINION_TEETH * 15);
+    public static final double DRIVE_WHEEL_FREE_SPEED_RPS = (DRIVING_MOTOR_FREE_SPEED_RPS * WHEEL_CIRCUMFERENCE_METERS)
+        / DRIVING_MOTOR_REDUCTION;
 
-    public static final int kDrivingMotorCurrentLimit = 50; // amps
-    public static final int kTurningMotorCurrentLimit = 20; // amps
+    // Drive encoder position and velocity conversion factors (calculated)
+    public static final double DRIVING_ENCODER_POSITION_CONVERSION_FACTOR = (WHEEL_DIAMETER_METERS * Math.PI)
+    / DRIVING_MOTOR_REDUCTION; // meters
+    public static final double DRIVING_ENCODER_VELOCITY_CONVERSION_FACTOR = (WHEEL_DIAMETER_METERS * Math.PI)
+    / DRIVING_MOTOR_REDUCTION / 60.0; // meters per second
 
-    public static final SwerveDriveKinematics kDriveKinematics = new SwerveDriveKinematics(
-      new Translation2d(HALF_LENGTH, HALF_WIDTH),
-      new Translation2d(HALF_LENGTH, -HALF_WIDTH),
-      new Translation2d(-HALF_LENGTH, HALF_WIDTH),
-      new Translation2d(-HALF_LENGTH, -HALF_WIDTH));
+    // Drive encoder position and velocity conversion factors (determined manually)
+    //public static final double DRIVING_ENCODER_POSITION_CONVERSION_FACTOR = 0.0508;
+    //public static final double DRIVING_ENCODER_VELOCITY_CONVERSION_FACTOR = 0.0508 / 60;
 
+    // Turning encoder position and velocity conversion factors
+    public static final double TURNING_ENCODER_POSITION_CONVERSION_FACTOR = 2 * Math.PI;
+    public static final double TURNING_ENCODER_VELOCITY_CONVERSION_FACTOR = 2 * Math.PI / 60.0;
 
-    //encoder offsets times 2pi (the position conversion factor)
-    public static final double ENCODER1_OFFSET = 0.932 * 2 * Math.PI;
-    public static final double ENCODER2_OFFSET = 0.359 * 2 * Math.PI;
-    public static final double ENCODER3_OFFSET = 0.517 * 2 * Math.PI;
-    public static final double ENCODER4_OFFSET = 0.575 * 2 * Math.PI;
-  
+    // Min/max turning encoder PID inputs
+    public static final double TURNING_ENCODER_POSITION_PID_MIN_INPUT = 0;
+    public static final double TURNING_ENCODER_POSITION_PID_MAX_INPUT = 2 * Math.PI; 
 
+    //driving encoder PIDF controller constants
+    public static final double DRIVING_P = 0.04;
+    public static final double DRIVING_I = 0;
+    public static final double DRIVING_D = 0;
+    public static final double DRIVING_FF = 1 / DRIVE_WHEEL_FREE_SPEED_RPS;
+    public static final double DRIVING_MIN_OUTPUT = -1;
+    public static final double DRIVING_MAX_OUTPUT = 1;
+
+    public static final double TURNING_P = 1;
+    public static final double TURNING_I = 0;
+    public static final double TURNING_D = 0;
+    public static final double TURNING_FF = 0;
+    public static final double TURNING_MIN_OUTPUT = -1;
+    public static final double TURNING_MAX_OUTPUT = 1;
+
+    // Define motor idle modes
+    public static final IdleMode DRIVING_MOTOR_IDLE_MODE = IdleMode.kBrake;
+    public static final IdleMode TURNING_MOTOR_IDLE_MODE = IdleMode.kBrake;
+
+    // Define motor current limits
+    public static final int DRIVING_MOTOR_CURRENT_LIMIT = 50; // amps
+    public static final int TURNING_MOTOR_CURRENT_LIMIT = 20; // amps
+
+    // Encoder offsets times 2pi (the position conversion factor)
+    public static final double FRONT_RIGHT_ENCODER_OFFSET = 0.932 * 2 * Math.PI;
+    public static final double FRONT_LEFT_ENCODER_OFFSET = 0.359 * 2 * Math.PI;
+    public static final double REAR_LEFT_ENCODER_OFFSET = 0.517 * 2 * Math.PI;
+    public static final double REAR_RIGHT_ENCODER_OFFSET = 0.575 * 2 * Math.PI;
   }
 
   public static class XboxConstants {
