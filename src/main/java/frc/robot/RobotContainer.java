@@ -9,6 +9,7 @@ import frc.robot.Constants.XboxConstants;
 import frc.robot.commands.drivetrain.DriveForwardGivenDistance;
 import frc.robot.commands.drivetrain.StrafeGivenDistance;
 import frc.robot.subsystems.DriveTrain;
+import frc.robot.subsystems.Gyro;
 import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.arm.ArmIO;
 import frc.robot.subsystems.arm.RealArm;
@@ -49,6 +50,7 @@ import frc.robot.commands.drivetrain.StallIntakeCmd;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final DriveTrain m_driveTrain = new DriveTrain();
+  private static Gyro m_gyro = new Gyro(); 
 
   private XboxController xbox = new XboxController(0);
   public static Intake intake;
@@ -106,7 +108,7 @@ public class RobotContainer {
   
     
     //B BUTTON (2): resets gyro
-    new JoystickButton(xbox, Button.kB.value).onTrue( new InstantCommand(() -> DriveTrain.ahrs.reset(), m_driveTrain));
+    new JoystickButton(xbox, Button.kB.value).onTrue( new InstantCommand(() -> m_gyro.resetYaw(), m_driveTrain));
 
     //new JoystickButton(joystick, 7).onTrue( new StrafeGivenDistance(-1, m_driveTrain));
 

@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DriveTrainConstants;
 import frc.robot.util.NavX.AHRS;
+import frc.robot.subsystems.Gyro;
 
 public class DriveTrain extends SubsystemBase {
   /** Creates a new ExampleSubsystem. */
@@ -44,16 +45,12 @@ public class DriveTrain extends SubsystemBase {
   public static RelativeEncoder driveEncoder3;
   public static RelativeEncoder driveEncoder4;
 
-  public static AHRS ahrs;
 
   private LinearFilter derivativeCalculator = LinearFilter.backwardFiniteDifference(1, 2, 0.02);
   private double pitchRate;
 
 
   public DriveTrain() {
-
-    ahrs = new AHRS(SPI.Port.kMXP, (byte) 66);
-    ahrs.reset();
 
     //right front
     steer1 = new CANSparkMax(32, MotorType.kBrushless);
@@ -218,7 +215,7 @@ public class DriveTrain extends SubsystemBase {
 //   m_leftEncoder.getDistance(),
 //   m_rightEncoder.getDistance());
 // m_field.setRobotPose(m_odometry.getPoseMeters());
-    SmartDashboard.putNumber("Gyro angle", ahrs.getAngle());
+    SmartDashboard.putNumber("Gyro angle", Gyro.yaw % 360);
     pitchRate = derivativeCalculator.calculate(getGyroPitch());
 
   }
@@ -227,7 +224,7 @@ public class DriveTrain extends SubsystemBase {
   
     SmartDashboard.putNumber("Encoder position: ", driveEncoder1.getPosition());
     //field oriented
-    double angleRad = Math.toRadians(ahrs.getAngle());
+    double angleRad = Math.toRadians(Gyro.yaw);
         double temp = fwd * Math.cos(angleRad) +
                 str * Math.sin(angleRad);
         str = -fwd * Math.sin(angleRad) + str * Math.cos(angleRad);
@@ -304,7 +301,7 @@ public class DriveTrain extends SubsystemBase {
   
     // set all wheel speeds
     if (flippedSpeed1 != 0) {
-      drive1.set(flippedSpeed1/speedProportion * 0.5);
+      drive1.set(flippedSpeed1/speedProportion * 0.3);
       steer1.getPIDController().setReference(convertToSparkMaxAngle(flippedAngle1), ControlType.kPosition);
 
     } else {
@@ -313,7 +310,7 @@ public class DriveTrain extends SubsystemBase {
     }
 
     if (flippedSpeed2 != 0) {
-      drive2.set(flippedSpeed2/speedProportion * 0.5);
+      drive2.set(flippedSpeed2/speedProportion * 0.3);
       steer2.getPIDController().setReference(convertToSparkMaxAngle(flippedAngle2), ControlType.kPosition);
 
     } else {
@@ -322,7 +319,7 @@ public class DriveTrain extends SubsystemBase {
     }
 
     if (flippedSpeed3 != 0) {
-      drive3.set(flippedSpeed3/speedProportion * 0.5);
+      drive3.set(flippedSpeed3/speedProportion * 0.3);
       steer3.getPIDController().setReference(convertToSparkMaxAngle(flippedAngle3), ControlType.kPosition);
 
     } else {
@@ -331,7 +328,7 @@ public class DriveTrain extends SubsystemBase {
     }
 
     if (flippedSpeed4 != 0) {
-      drive4.set(flippedSpeed4/speedProportion * 0.5);
+      drive4.set(flippedSpeed4/speedProportion * 0.3);
       steer4.getPIDController().setReference(convertToSparkMaxAngle(flippedAngle4), ControlType.kPosition);
 
     } else {
@@ -408,7 +405,7 @@ public class DriveTrain extends SubsystemBase {
   }
 
   public double getGyroPitch() {
-    return -ahrs.getPitch();
+    return -Gyro.pitch;
   }
 
   public double getGyroPitchRate()
