@@ -36,7 +36,6 @@ public final class Constants {
     public static final double kTurningEncoderPositionPIDMaxInput = 2 * Math.PI; 
 
 
-
     public static final SwerveDriveKinematics kDriveKinematics = new SwerveDriveKinematics(
       new Translation2d(HALF_LENGTH, HALF_WIDTH),
       new Translation2d(HALF_LENGTH, -HALF_WIDTH),
@@ -45,10 +44,14 @@ public final class Constants {
 
 
     //encoder offsets times 2pi (the position conversion factor)
-    public static final double ENCODER1_OFFSET = 0.932 * 2 * Math.PI;
-    public static final double ENCODER2_OFFSET = 0.359 * 2 * Math.PI;
-    public static final double ENCODER3_OFFSET = 0.517 * 2 * Math.PI;
-    public static final double ENCODER4_OFFSET = 0.575 * 2 * Math.PI;
+    // public static final double ENCODER1_OFFSET = 0.932 * 2 * Math.PI;
+    // public static final double ENCODER2_OFFSET = 0.359 * 2 * Math.PI;
+    // public static final double ENCODER3_OFFSET = 0.517 * 2 * Math.PI;
+    // public static final double ENCODER4_OFFSET = 0.575 * 2 * Math.PI;
+    public static final double ENCODER1_OFFSET = 0.0682531 * 2 * Math.PI;
+    public static final double ENCODER2_OFFSET = 0.6450055 * 2 * Math.PI;
+    public static final double ENCODER3_OFFSET = 0.5150635 * 2 * Math.PI;
+    public static final double ENCODER4_OFFSET = 0.4205395 * 2 * Math.PI;
   
 
   }
