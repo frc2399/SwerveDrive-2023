@@ -83,9 +83,15 @@ public class RobotContainer {
     
     m_driveTrain.setDefaultCommand(new RunCommand(() -> m_driveTrain.setSpeed(
       -computeDeadband(xbox.getRawAxis(XboxController.Axis.kLeftY.value), 0.07),
-      computeDeadband(xbox.getRawAxis(XboxController.Axis.kLeftX.value), 0.07),
-      computeDeadband(Math.pow(xbox.getRawAxis(XboxController.Axis.kRightX.value), 3), 0.05)),
-      m_driveTrain));      
+      0,
+      0),
+      m_driveTrain));    
+
+    // m_driveTrain.setDefaultCommand(new RunCommand(() -> m_driveTrain.setSpeed(
+    //   -computeDeadband(xbox.getRawAxis(XboxController.Axis.kLeftY.value), 0.07),
+    //   computeDeadband(xbox.getRawAxis(XboxController.Axis.kLeftX.value), 0.07),
+    //   computeDeadband(Math.pow(xbox.getRawAxis(XboxController.Axis.kRightX.value), 3), 0.05)),
+    //   m_driveTrain));      
 
      //right trigger to intake and left trigger to outtake on driver
     intake.setDefaultCommand(

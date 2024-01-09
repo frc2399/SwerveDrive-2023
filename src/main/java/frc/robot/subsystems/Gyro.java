@@ -10,7 +10,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Gyro extends SubsystemBase {
-  static final Pigeon2 gyro = new Pigeon2(2, "rio");
+  static final Pigeon2 gyro = new Pigeon2(3, "rio");
   static double yaw;
   static double pitch;
   static double roll;
